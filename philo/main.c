@@ -12,6 +12,31 @@ void init_monitor(t_monitor *monitor,int argc, char *argv[])
 		monitor->eat_limit = -1;
 }
 
+void init_forks(t_monitor *monitor)
+{
+	int i;
+
+	i = 0;
+	while(i < monitor->p_num)
+	{
+		pthread_mutex_init(&monitor->philos[i].left_fork, NULL);
+		monitor->philos[i].right_fork = &monitor->philos[(i + 1) % monitor->p_num].left_fork;
+		i++;
+	}
+}
+
+void init_philos_threads(t_monitor *monitor)
+{
+	int i;
+
+	i = 0;
+	while(i < monitor->p_num)
+	{
+		pthread_create(&monitor->philos[i].thread, NULL, philo_routine, &monitor->philos[i]);
+		i++;
+	}
+}
+
 int main (int argc, char *argv[])
 {
 	t_monitor monitor;
