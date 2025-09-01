@@ -4,10 +4,12 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <pthread.h>
 
 typedef struct s_philo
 {
 	int id;
+	int		eat_count;
 	struct timeval	last_eat;
 	void			*right_fork;
 	void			*left_fork;
