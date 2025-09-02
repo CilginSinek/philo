@@ -56,26 +56,83 @@ int	init_mutex(t_monitor *monitor)
 	return (0);
 }
 
+long int get_time(struct timeval start)
+{
+	struct timeval	current;
+
+	gettimeofday(&current, NULL);
+	return ((current.tv_sec - start.tv_sec) * 1000 + (current.tv_usec - start.tv_usec) / 1000);
+}
+
+int healty_check(t_monitor *monitor, t_philo *philo)
+{
+	long int current;
+
+	current = get_time(monitor->start_time);
+	if (current - philo->last_eat > monitor->die_time / 1000)
+	{
+		monitor->die = DIE;
+		pthread_mutex_lock(&monitor->print_mutex);
+		printf("%ld %d died\n", current, philo->id);
+		pthread_mutex_unlock(&monitor->print_mutex);
+		return (1);
+	}
+	return (0);
+}
+
+void *philo_routine(void *args)
+{
+	t_monitor	*monitor;
+	t_philo		*philo;
+
+	monitor = (t_monitor *)args;
+	philo = (t_philo *)(args + 1);
+	while (monitor->die == ALIVE)
+	{
+		if (healty_check(monitor, philo))
+			break ;
+			//* burdan devam edicez eat,sleep,think
+	}
+	return (NULL);
+}
+
+void init_philos(t_monitor *monitor)
+{
+	int	i;
+
+	i = 0;
+	while (i < monitor->p_num)
+	{
+		monitor->philos[i].id = i + 1;
+		monitor->philos[i].eat_count = 0;
+		monitor->philos[i].last_eat = 0;
+		i++;
+	}
+}
+
 void	init_philos_threads(t_monitor *monitor)
 {
 	int	i;
-	int	created;
+	int	c;
 
-	created = 0;
-	while (created < monitor->p_num)
+	c = 0;
+	gettimeofday(&monitor->start_time, NULL);
+	init_philos(monitor);
+	while (c < monitor->p_num)
 	{
-		if (pthread_create(&monitor->philos[created++].thread,
-				NULL, philo_routine, &monitor->philos[created]) != 0)
+		if (pthread_create(&monitor->philos[c].thread,
+				NULL, philo_routine,
+				(void *[]){monitor, &monitor->philos[c]}) != 0)
 		{
 			monitor->die = DIE;
 			break ;
 		}
-		created++;
+		c++;
 	}
 	i = 0;
 	if (monitor->die == DIE)
 		printf("Failed to create threads\n");
-	while (i < created)
+	while (i < c)
 		pthread_join(monitor->philos[i++].thread, NULL);
 }
 
