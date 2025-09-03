@@ -80,18 +80,93 @@ int healty_check(t_monitor *monitor, t_philo *philo)
 	return (0);
 }
 
+int is_full(t_monitor *monitor)
+{
+	int	i;
+
+	i = 0;
+	if (monitor->eat_limit == -1)
+		return (0);
+	while (i < monitor->p_num)
+	{
+		if (monitor->philos[i].eat_count < monitor->eat_limit)
+			return (0);
+		i++;
+	}
+	monitor->die = DIE;
+	return (1);
+}
+
+int is_alive_in_event(long int event_time, t_monitor *monitor, t_philo *philo)
+{
+	long int time_left;
+
+	time_left = monitor->die_time - (event_time + (philo->last_eat - get_time(monitor->start_time)));
+	if (time_left < 0)
+	{
+		usleep(time_left * -1 * 1000);
+		healthy_check(monitor, philo);
+		return (1);
+	}
+	usleep(event_time * 1000);
+	return (0);
+}
+
+int feed_philo(t_monitor *monitor, t_philo *philo)
+{
+	pthread_mutex_lock(&philo->left_fork);
+	pthread_mutex_lock(philo->right_fork);
+	if (is_alive_in_event(monitor->eat_time, monitor, philo))
+		return (1);
+	philo->eat_count++;
+	philo->last_eat = get_time(monitor->start_time);
+	pthread_mutex_lock(&monitor->print_mutex);
+	printf("%ld %d is eating\n", get_time(monitor->start_time), philo->id);
+	pthread_mutex_unlock(&monitor->print_mutex);
+	pthread_mutex_unlock(philo->right_fork);
+	pthread_mutex_unlock(&philo->left_fork);
+	return (0);
+}
+
+int sleep_philo(t_monitor *monitor, t_philo *philo)
+{
+	if (is_alive_in_event(monitor->sleep_time, monitor, philo))
+		return (1);
+	pthread_mutex_lock(&monitor->print_mutex);
+	printf("%ld %d is sleeping\n", get_time(monitor->start_time), philo->id);
+	pthread_mutex_unlock(&monitor->print_mutex);
+	return (0);
+}
+
+void think_philo(t_monitor *monitor, t_philo *philo)
+{
+	pthread_mutex_lock(&monitor->print_mutex);
+	printf("%ld %d is thinking\n", get_time(monitor->start_time), philo->id);
+	pthread_mutex_unlock(&monitor->print_mutex);
+}
+
 void *philo_routine(void *args)
 {
 	t_monitor	*monitor;
 	t_philo		*philo;
+	static char first_call = 1;
 
 	monitor = (t_monitor *)args;
 	philo = (t_philo *)(args + 1);
 	while (monitor->die == ALIVE)
 	{
-		if (healty_check(monitor, philo))
+		if (healty_check(monitor, philo) || is_full(monitor))
 			break ;
-			//* burdan devam edicez eat,sleep,think
+		if (first_call && philo->id % 2 == 0)
+		{
+			usleep(500);
+			first_call = 0;
+		}
+		if (feed_philo(monitor, philo))
+			break ;
+		if (sleep_philo(monitor, philo))
+			break ;
+		think_philo(monitor, philo);
 	}
 	return (NULL);
 }
