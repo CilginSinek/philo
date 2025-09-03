@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 20:19:11 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/01 20:19:11 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/03 15:47:07 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int	init_monitor(t_monitor *monitor, int argc, char *argv[])
 	if (monitor->p_num <= 0 || monitor->die_time <= 0
 		|| monitor->eat_time <= 0 || monitor->sleep_time <= 0)
 		return (0);
-	if (argc == 6 || ft_atoi(argv[5]) <= 0)
+	if (argc == 6 && ft_atoi(argv[5]) <= 0)
 		return (0);
 	return (1);
 }
@@ -46,6 +46,7 @@ int	init_mutex(t_monitor *monitor)
 		}
 		monitor->philos[i].right_fork = &monitor->philos[
 			(i + 1) % monitor->p_num].left_fork;
+		i++;
 	}
 	if (pthread_mutex_init(&monitor->print_mutex, NULL) != 0)
 	{
@@ -64,7 +65,7 @@ long int get_time(struct timeval start)
 	return ((current.tv_sec - start.tv_sec) * 1000 + (current.tv_usec - start.tv_usec) / 1000);
 }
 
-int healty_check(t_monitor *monitor, t_philo *philo)
+int healthy_check(t_monitor *monitor, t_philo *philo)
 {
 	long int current;
 
@@ -145,17 +146,17 @@ void think_philo(t_monitor *monitor, t_philo *philo)
 	pthread_mutex_unlock(&monitor->print_mutex);
 }
 
-void *philo_routine(void *args)
+void *philo_routine(void *arg)
 {
 	t_monitor	*monitor;
 	t_philo		*philo;
 	static char first_call = 1;
 
-	monitor = (t_monitor *)args;
-	philo = (t_philo *)(args + 1);
+	philo = (t_philo *)arg;
+	monitor = philo->monitor;
 	while (monitor->die == ALIVE)
 	{
-		if (healty_check(monitor, philo) || is_full(monitor))
+		if (healthy_check(monitor, philo) || is_full(monitor))
 			break ;
 		if (first_call && philo->id % 2 == 0)
 		{
@@ -181,6 +182,7 @@ void init_philos(t_monitor *monitor)
 		monitor->philos[i].id = i + 1;
 		monitor->philos[i].eat_count = 0;
 		monitor->philos[i].last_eat = 0;
+		monitor->philos[i].monitor = monitor;
 		i++;
 	}
 }
@@ -196,8 +198,7 @@ void	init_philos_threads(t_monitor *monitor)
 	while (c < monitor->p_num)
 	{
 		if (pthread_create(&monitor->philos[c].thread,
-				NULL, philo_routine,
-				(void *[]){monitor, &monitor->philos[c]}) != 0)
+				NULL, philo_routine, &monitor->philos[c]) != 0)
 		{
 			monitor->die = DIE;
 			break ;
@@ -208,7 +209,10 @@ void	init_philos_threads(t_monitor *monitor)
 	if (monitor->die == DIE)
 		printf("Failed to create threads\n");
 	while (i < c)
-		pthread_join(monitor->philos[i++].thread, NULL);
+	{
+		pthread_join(monitor->philos[i].thread, NULL);
+		i++;
+	}
 }
 
 void	clean_up(t_monitor *monitor)
@@ -231,7 +235,7 @@ int	main(int argc, char *argv[])
 	if (argc < 5 || argc > 6)
 	{
 		printf("using: ./philo number_of_philosopher time_to_die time_to_eat \
-        time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
+time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (1);
 	}
 	if (init_monitor(&monitor, argc, argv) == 0)
@@ -250,5 +254,6 @@ int	main(int argc, char *argv[])
 		return (1);
 	}
 	init_philos_threads(&monitor);
+	clean_up(&monitor);
 	return (0);
 }

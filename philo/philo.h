@@ -8,12 +8,13 @@
 
 typedef struct s_philo
 {
-	int 			id;
-	int				eat_count;
-	long int		last_eat;
-	pthread_mutex_t	*right_fork;
-	pthread_mutex_t	left_fork;
-	pthread_t		thread;
+	int 				id;
+	int					eat_count;
+	long int			last_eat;
+	pthread_mutex_t		*right_fork;
+	pthread_mutex_t		left_fork;
+	pthread_t			thread;
+	struct s_monitor	*monitor;
 }   t_philo;
 
 typedef enum e_is_die
