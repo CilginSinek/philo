@@ -1,5 +1,5 @@
-NAME=philo
-SRC= main.c utils.c init.c events.c just_atoi.c
+NAME=philo_bonus
+SRC= 
 OBJ=$(SRC:.c=.o)
 CFLAGS=-Wall -Wextra -Werror -pthread
 CC=cc

@@ -80,10 +80,7 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (1);
 	}
 	if (init_monitor(&monitor, argc, argv) == 0)
-	{
-		printf("Invalid arguments\n");
-		return (1);
-	}
+		return (printf("Invalid arguments\n"), 1);
 	monitor.philos = malloc(sizeof(t_philo) * monitor.p_num);
 	if (!monitor.philos)
 		return (printf("Failed to allocate memory \
