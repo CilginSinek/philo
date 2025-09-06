@@ -95,6 +95,7 @@ char *init_sem_name(int id)
 	char *name;
 	char *id_str;
 	char *prefix = "/philo_eat_sem_";
+	char *temp;
 
 	id_str = ft_itoa(id);
 	if (!id_str)
@@ -102,12 +103,13 @@ char *init_sem_name(int id)
 	name = malloc(sizeof(char) * (ft_strlen(prefix) + ft_strlen(id_str) + 1));
 	if (!name)
 		return (free(id_str), NULL);
+	temp = name;
 	while(*prefix)
 		*name++ = *prefix++;
 	while(*id_str)
 		*name++ = *id_str++;
 	*name = '\0';
-	return (free(id_str), name);
+	return (free(id_str), tmp);
 }
 
 void append_sems_monitor(t_monitor *monitor)
@@ -120,6 +122,24 @@ void append_sems_monitor(t_monitor *monitor)
 		monitor->eat_sems[i] = monitor->philos[i].philo_eat_sem;
 		i++;
 	}
+}
+
+void clean_temp_sems(t_monitor *monitor, int count)
+{
+	char *sem_name;
+
+	while (--count)
+	{
+		sem_name = init_sem_name(count + 1);
+		if (sem_name)
+		{
+			sem_close(monitor->philos[count].philo_eat_sem);
+			sem_unlink(sem_name);
+			free(sem_name);
+		}else
+			break ;
+	}
+	free(monitor->philos);
 }
 
 int	init_philos(t_monitor *monitor)
@@ -153,10 +173,10 @@ int	init_philos(t_monitor *monitor)
 		sem_name = init_sem_name(i + 1);
 		if (!sem_name)
 		{
-			printf("Semaphore name allocation failed\n");
 			cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
 			while (--i >= 0)
 			{
+				printf("Memory allocation failed\n");
 				sem_close(monitor->philos[i].philo_eat_sem);
 				sem_unlink(sem_name);
 			}
@@ -168,12 +188,7 @@ int	init_philos(t_monitor *monitor)
 		{
 			printf("Semaphore initialization failed\n");
 			cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
-			while (--i >= 0)
-			{
-				sem_close(monitor->philos[i].philo_eat_sem);
-				sem_unlink(sem_name);
-			}
-			free(monitor->philos);
+			clean_temp_sems(monitor, i);
 			free(sem_name);
 			return (0);
 		}
@@ -196,18 +211,140 @@ void	start_flag_up(t_monitor *monitor)
 	}
 }
 
+void print_action(t_philo *philo, char *action)
+{
+	t_monitor *monitor;
+
+	monitor = philo->monitor;
+	sem_wait(monitor->print_sem);
+	printf("%ld %d %s\n", get_time(monitor->start_time)
+		- philo->last_eat, philo->id, action);
+	sem_post(monitor->print_sem);
+}
+
+int healty_check(t_philo *philo)
+{
+	t_monitor *monitor;
+
+	monitor = philo->monitor;
+	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
+	{
+		philo->die = DIE;
+		monitor->die = DIE;
+		print_action(philo, "is died");
+		sem_post(monitor->dead_sem);
+		return (1);
+	}
+	return (0);
+}
+
+int take_fork(t_philo *philo, t_monitor *monitor)
+{
+	char fork_flag;
+
+	fork_flag = 0;
+	while(!fork_flag)
+	{
+		if (healty_check(philo))
+			return (1);
+		sem_wait(monitor->forks);
+		fork_flag = 1;
+	}
+	print_action(philo, "has taken a fork");
+	return (0);
+}
+
+int take_forks(t_philo *philo)
+{
+	t_monitor *monitor;
+	char fork_flag;
+
+	fork_flag = 0;
+	monitor = philo->monitor;
+	if (take_fork(philo, monitor))
+		return (1);
+	if (take_fork(philo, monitor))
+		return (1);
+	return (0);
+}
+
+int	feed_philo(t_philo *philo)
+{
+	t_monitor *monitor;
+
+	monitor = philo->monitor;
+	if (take_forks(philo))
+		return (1);
+	philo->last_eat = get_time(monitor->start_time);
+	philo->eat_count++;
+	print_action(philo, "is eating");
+	sem_post(philo->philo_eat_sem);
+	usleep(monitor->eat_time * 1000);
+	sem_post(monitor->forks);
+	sem_post(monitor->forks);
+	return (0);
+}
+
+int is_alive_in_event(t_monitor *monitor, int event_time)
+{
+	int long timeleft;
+
+	timeleft = monitor->die_time - (get_time(monitor->start_time)
+			- monitor->philos->last_eat);
+	if (timeleft < event_time)
+	{
+		usleep(timeleft * 1000);
+		return (0);
+	}
+	usleep(event_time * 1000);
+	return (1);
+}
+
+int sleep_philo(t_philo *philo)
+{
+	t_monitor *monitor;
+
+	monitor = philo->monitor;
+	if (healty_check(philo))
+		return (1);
+	print_action(philo, "is sleeping");
+	if (is_alive_in_event(monitor, monitor->sleep_time))
+		return (1);
+	return (0);
+}
+
+int think_philo(t_philo *philo)
+{
+	t_monitor *monitor;
+
+	monitor = philo->monitor;
+	if (healty_check(philo))
+		return (1);
+	print_action(philo, "is thinking");
+	return (0);
+}
+
+//* HER ŞEYİ YANLIŞ YAPTIM BÜTÜN HEALTY_CHECKLERİ MONİTOR YAPCAK
 void	philosopher_routine(t_philo *philo)
 {
 	t_monitor	*monitor;
 
 	monitor = philo->monitor;
+	monitor->philos->last_eat = get_time(monitor->start_time);
 	if (philo->id % 2 == 0)
 		usleep(500);
-	monitor->philos->last_eat = get_time(monitor->start_time);
-	// while (philo->die == ALIVE)
-	// {
-	// 	//* bşyler yapmamız lazım imdat
-	// }
+	while (philo->die == ALIVE)
+	{
+		if (healty_check(philo))
+			break ;
+		if (feed_philo(philo))
+			break ;
+		if (sleep_philo(philo))
+			break ;
+		if (think_philo(philo))
+			break ;
+	}
+	exit(0);
 }
 
 void	create_start_process(t_monitor *monitor)
@@ -229,10 +366,8 @@ void	create_start_process(t_monitor *monitor)
 		}
 		if (monitor->philos[i].pid == 0)
 		{
-			while (1)
-				sem_wait(monitor->start_sem);
+			sem_wait(monitor->start_sem);
 			philosopher_routine(&monitor->philos[i]);
-			exit(0);
 		}
 		i++;
 	}
