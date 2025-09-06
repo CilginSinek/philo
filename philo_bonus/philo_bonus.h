@@ -21,18 +21,19 @@
 
 typedef enum e_is_die
 {
-    DIE = 1,
-    ALIVE
+	DIE = 1,
+	ALIVE
 }	t_is_die;
 
 typedef struct s_philo
 {
-    int					id;
-    int					eat_count;
-    long int			last_eat;
-    pid_t				pid;
-    struct s_monitor	*monitor;
-    t_is_die			die;
+	int					id;
+	int					eat_count;
+	long int			last_eat;
+	pid_t				pid;
+	struct s_monitor	*monitor;
+	sem_t				*philo_eat_sem;
+	t_is_die			die;
 }	t_philo;
 
 typedef struct s_monitor
@@ -44,11 +45,13 @@ typedef struct s_monitor
 	int				eat_limit;
 	t_is_die		die;
 	struct timeval	start_time;
-    sem_t			*forks;
-    sem_t			*print_sem;
-    sem_t			*dead_sem;
+	sem_t			*start_sem;
+	sem_t			*forks;
+	sem_t			*print_sem;
+	sem_t			*dead_sem;
+	sem_t			**eat_sems;
+    pid_t			eat_watcher;
 	t_philo			*philos;
 }	t_monitor;
-
 
 #endif

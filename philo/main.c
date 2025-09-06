@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-void	setdead(t_monitor *monitor, int i)
+static void	setdead(t_monitor *monitor, int i)
 {
 	pthread_mutex_lock(&monitor->dead_mutex);
 	monitor->die = DIE;
@@ -69,6 +69,17 @@ void	*philo_routine(void *arg)
 	return (NULL);
 }
 
+void	one_philo_event(t_monitor *monitor)
+{
+	struct timeval	start_time;
+
+	gettimeofday(&start_time, NULL);
+	print_events(&monitor->print_mutex, 1, "has taken a fork",
+		start_time);
+	usleep(monitor->die_time * 1000);
+	print_events(&monitor->print_mutex, 1, "is died", start_time);
+}
+
 int	main(int argc, char *argv[])
 {
 	t_monitor	monitor;
@@ -91,7 +102,10 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		printf("Failed to initialize mutexes\n");
 		return (1);
 	}
-	init_philos_threads(&monitor);
+	if (monitor.p_num == 1)
+		one_philo_event(&monitor);
+	else
+		init_philos_threads(&monitor);
 	cleanup_mutexes(&monitor, monitor.p_num, 1, 1);
 	return (0);
 }
