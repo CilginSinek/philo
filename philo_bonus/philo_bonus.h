@@ -16,14 +16,25 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 # include <semaphore.h>
 # include <pthread.h>
+# include <unistd.h>
+# include <fcntl.h>
 
 typedef enum e_is_die
 {
 	DIE = 1,
 	ALIVE
 }	t_is_die;
+
+typedef enum e_boolean
+{
+	NONE = -1,
+	FALSE = 0,
+	TRUE = 1
+}	t_boolean;
 
 typedef struct s_philo
 {
@@ -33,6 +44,7 @@ typedef struct s_philo
 	pid_t				pid;
 	struct s_monitor	*monitor;
 	sem_t				*philo_eat_sem;
+	pid_t				eat_pid;
 	t_is_die			die;
 }	t_philo;
 
@@ -50,7 +62,8 @@ typedef struct s_monitor
 	sem_t			*print_sem;
 	sem_t			*dead_sem;
 	sem_t			**eat_sems;
-    pid_t			eat_watcher;
+	char			**e_sem_names;
+	t_boolean		eat_complete;
 	t_philo			*philos;
 }	t_monitor;
 

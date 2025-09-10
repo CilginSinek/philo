@@ -1,5 +1,5 @@
 NAME=philo_bonus
-SRC= 
+SRC= main_bonus.c
 OBJ=$(SRC:.c=.o)
 CFLAGS=-Wall -Wextra -Werror -pthread
 CC=cc
