@@ -146,6 +146,7 @@ int	init_monitor(t_monitor *monitor, int argc, char *argv[])
  * 			(1 if initialized, 0 otherwise)
  * @note flags[0] - forks, flags[1] - print_sem,
  * 			flags[2] - dead_sem, flags[3] - start_sem
+ * 			flags[4] - eat_sems
  */
 void	cleanup_semaphores(t_monitor *monitor, int *flags)
 {
@@ -169,6 +170,11 @@ void	cleanup_semaphores(t_monitor *monitor, int *flags)
 		sem_close(monitor->start_sem);
 		sem_unlink("/start_sem");
 	}
+	if (flags[4])
+	{
+		sem_close(monitor->eat_sems);
+		sem_unlink("/eat_sems");
+	}
 }
 
 int	init_semaphores(t_monitor *monitor)
@@ -178,6 +184,7 @@ int	init_semaphores(t_monitor *monitor)
     sem_unlink("/print_sem");
     sem_unlink("/dead_sem");
     sem_unlink("/start_sem");
+	sem_unlink("/eat_sems");
 
 	monitor->forks = sem_open("/forks", O_CREAT, 0644, monitor->p_num);
 	if (monitor->forks == SEM_FAILED)
@@ -185,101 +192,33 @@ int	init_semaphores(t_monitor *monitor)
 	monitor->print_sem = sem_open("/print_sem", O_CREAT, 0644, 1);
 	if (monitor->print_sem == SEM_FAILED)
 	{
-		cleanup_semaphores(monitor, (int []){1, 0, 0, 0});
+		cleanup_semaphores(monitor, (int []){1, 0, 0, 0, 0});
 		return (0);
 	}
 	monitor->dead_sem = sem_open("/dead_sem", O_CREAT, 0644, 0);
 	if (monitor->dead_sem == SEM_FAILED)
 	{
-		cleanup_semaphores(monitor, (int []){1, 1, 0, 0});
+		cleanup_semaphores(monitor, (int []){1, 1, 0, 0, 0});
 		return (0);
 	}
 	monitor->start_sem = sem_open("/start_sem", O_CREAT, 0644, 0);
 	if (monitor->start_sem == SEM_FAILED)
 	{
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 0});
+		cleanup_semaphores(monitor, (int []){1, 1, 1, 0, 0});
 		return (0);
 	}
-	return (1);
-}
-
-char *init_sem_name(int id)
-{
-	char *name;
-	char *id_str;
-	char *prefix;
-	int i;
-	int j;
-
-	i = 0;
-	j = 0;
-	prefix = "philo_eat_sem_";
-	id_str = ft_itoa(id);
-	if (!id_str)
-		return (NULL);
-	name = malloc(sizeof(char) * (ft_strlen(prefix) + ft_strlen(id_str) + 1));
-	if (!name)
-		return (free(id_str), NULL);
-	while(*prefix)
-		name[i++] = *prefix++;
-	while(id_str[j])
-		name[i++] = id_str[j++];
-	name[i] = '\0';
-	return (free(id_str), name);
-}
-
-int init_eat_sems(t_monitor *monitor)
-{
-	int i;
-
-	monitor->e_sem_names = malloc(sizeof(char *) * monitor->p_num);
-	if (!monitor->e_sem_names)
-		return (0);
-	i = 0;
-	while (i < monitor->p_num)
+	if(monitor->eat_complete != NONE)
 	{
-		monitor->e_sem_names[i] = init_sem_name(i + 1);
-		if (!monitor->e_sem_names[i])
+		monitor->eat_sems = sem_open("/eat_sems", O_CREAT, 0644, 0);
+		if (monitor->eat_sems == SEM_FAILED)
 		{
-			while (--i >= 0)
-				free(monitor->e_sem_names[i]);
-			free(monitor->e_sem_names);
+			cleanup_semaphores(monitor, (int []){1, 1, 1, 1, 0});
 			return (0);
 		}
-		i++;
 	}
 	return (1);
 }
 
-void append_sems_monitor(t_monitor *monitor)
-{
-	int i;
-
-	i = 0;
-	while (i < monitor->p_num)
-	{
-		monitor->eat_sems[i] = monitor->philos[i].philo_eat_sem;
-		i++;
-	}
-}
-
-void clean_eat_sems(t_monitor *monitor)
-{
-	int i;
-	char *sem_name;
-
-	i = 0;
-	while (i < monitor->p_num)
-	{
-		sem_name = monitor->e_sem_names[i];
-		sem_close(monitor->philos[i].philo_eat_sem);
-		sem_unlink(sem_name);
-		free(sem_name);
-		i++;
-	}
-	free(monitor->philos);
-	free(monitor->eat_sems);
-}
 
 int	init_philos(t_monitor *monitor)
 {
@@ -292,22 +231,6 @@ int	init_philos(t_monitor *monitor)
 		cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
 		return (0);
 	}
-	monitor->eat_sems = malloc(sizeof(sem_t *) * monitor->p_num);
-	if (!monitor->eat_sems)
-	{
-		printf("Memory allocation failed\n");
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
-		free(monitor->philos);
-		return (0);
-	}
-	if (!init_eat_sems(monitor))
-	{
-		printf("Memory allocation failed\n");
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
-		free(monitor->philos);
-		free(monitor->eat_sems);
-		return (0);
-	}
 	i = 0;
 	while (i < monitor->p_num)
 	{
@@ -316,17 +239,8 @@ int	init_philos(t_monitor *monitor)
 		monitor->philos[i].last_eat = 0;
 		monitor->philos[i].monitor = monitor;
 		monitor->philos[i].die = ALIVE;
-		monitor->philos[i].philo_eat_sem = sem_open(monitor->e_sem_names[i], O_CREAT, 0644, 0);
-		if(monitor->philos[i].philo_eat_sem == SEM_FAILED)
-		{
-			printf("Semaphore initialization failed\n");
-			cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
-			clean_eat_sems(monitor);
-			return (0);
-		}
 		i++;
 	}
-	append_sems_monitor(monitor);
 	return (1);
 }
 
@@ -399,10 +313,11 @@ int	feed_philo(t_philo *philo)
 	monitor = philo->monitor;
 	if (take_forks(philo))
 		return (1);
+	print_action(philo, "is eating");
 	philo->last_eat = get_time(monitor->start_time);
 	philo->eat_count++;
-	print_action(philo, "is eating");
-	sem_post(philo->philo_eat_sem);
+	if (monitor->eat_complete != NONE && philo->eat_count == monitor->eat_limit)
+		sem_post(monitor->eat_sems);
 	usleep(monitor->eat_time * 1000);
 	sem_post(monitor->forks);
 	sem_post(monitor->forks);
@@ -449,7 +364,7 @@ void	philosopher_routine(t_philo *philo)
 {
 	philo->last_eat = get_time(philo->monitor->start_time);
 	if (philo->id % 2 == 0)
-		usleep(500);
+		usleep(1000);
 	while (philo->die == ALIVE)
 	{
 		if (healty_check(philo))
@@ -500,72 +415,53 @@ void	create_start_process(t_monitor *monitor)
 		}
 		i++;
 	}
-	start_flag_up(monitor);
 }
 
-int everyone_ate(t_monitor *monitor)
+
+pid_t eat_watcher(t_monitor *monitor)
 {
-	int i;
+	pid_t	eat_pid;
+	int		eat_count;
 
-	i = 0;
-	while (i < monitor->p_num)
+	eat_pid = fork();
+	if (eat_pid < 0)
 	{
-		if (monitor->philos[i].eat_count < monitor->eat_limit)
-			return (0);
-		i++;
+		printf("Fork failed\n");
+		return (-1);
 	}
-	return (1);
-}
-
-void eat_watcher(t_monitor *monitor)
-{
-	int i;
-	int eat_count;
-
-	i = 0;
-	while(i < monitor->p_num)
+	if (eat_pid == 0)
 	{
-		monitor->philos[i].eat_pid = fork();
-		if(monitor->philos[i].eat_pid < 0)
+		eat_count = 0;
+		while (eat_count < monitor->p_num)
 		{
-			while(--i >= 0)
-				kill(monitor->philos[i].eat_pid, SIGTERM);
-			printf("Fork failed\n");
-			return ;
+			sem_wait(monitor->eat_sems);
+			eat_count++;
 		}
-		if(monitor->philos[i].eat_pid == 0)
-		{
-			eat_count = 0;
-			while(eat_count < monitor->eat_limit)
-			{
-				sem_wait(monitor->philos[i].philo_eat_sem);
-				eat_count++;
-			}
-			printf("eat_pidler exit atıo\n");
-			exit(0);
-		}
-		i++;
+		exit(0);
 	}
+	return (eat_pid);
 }
 
 void	monitoring(t_monitor *monitor)
 {
 	int	i;
+	pid_t eat_pid;
 
 	i = 0;
 	if(monitor->eat_complete != NONE)
 	{
-		eat_watcher(monitor);
+		eat_pid = eat_watcher(monitor);
+		// -1 olma durumunu handle et
 		monitor->eat_complete = TRUE;
 	}
+	start_flag_up(monitor);
 	waitpid(-1, NULL, 0);
 	i = 0;
 	while (i < monitor->p_num)
 	{
-		printf("calisma aq\n");
 		kill(monitor->philos[i].pid, SIGTERM);
 		if(monitor->eat_complete == FALSE)
-			kill(monitor->philos[i].eat_pid, SIGTERM);
+			kill(eat_pid, SIGTERM);
 		i++;
 	}
 }
@@ -588,8 +484,7 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (printf("Philosopher initialization failed\n"), 1);
 	create_start_process(&monitor);
 	monitoring(&monitor);
-	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1});
+	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1, 1});
 	free(monitor.philos);
-	free(monitor.eat_sems);
 	return (0);
 }

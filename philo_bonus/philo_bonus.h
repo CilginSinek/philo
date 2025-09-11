@@ -43,8 +43,6 @@ typedef struct s_philo
 	long int			last_eat;
 	pid_t				pid;
 	struct s_monitor	*monitor;
-	sem_t				*philo_eat_sem;
-	pid_t				eat_pid;
 	t_is_die			die;
 }	t_philo;
 
@@ -61,8 +59,7 @@ typedef struct s_monitor
 	sem_t			*forks;
 	sem_t			*print_sem;
 	sem_t			*dead_sem;
-	sem_t			**eat_sems;
-	char			**e_sem_names;
+	sem_t			*eat_sems;
 	t_boolean		eat_complete;
 	t_philo			*philos;
 }	t_monitor;
