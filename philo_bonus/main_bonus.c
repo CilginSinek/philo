@@ -214,9 +214,9 @@ void cleanup_child(t_monitor *monitor)
 
 int	init_semaphores(t_monitor *monitor)
 {
-    // sem_unlink("/forks");
-    // sem_unlink("/print_sem");
-    // sem_unlink("/start_sem");
+    sem_unlink("/forks");
+    sem_unlink("/print_sem");
+    sem_unlink("/start_sem");
 	if(monitor->eat_complete != NONE)
 		sem_unlink("/eat_sems");
 
@@ -226,13 +226,13 @@ int	init_semaphores(t_monitor *monitor)
 	monitor->print_sem = sem_open("/print_sem", O_CREAT, 0644, 1);
 	if (monitor->print_sem == SEM_FAILED)
 	{
-		cleanup_semaphores(monitor, (int []){1, 0, 0, 0, 0});
+		cleanup_semaphores(monitor, (int []){1, 0, 0, 0});
 		return (0);
 	}
 	monitor->start_sem = sem_open("/start_sem", O_CREAT, 0644, 0);
 	if (monitor->start_sem == SEM_FAILED)
 	{
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 0, 0});
+		cleanup_semaphores(monitor, (int []){1, 1, 0, 0});
 		return (0);
 	}
 	if(monitor->eat_complete != NONE)
@@ -240,7 +240,7 @@ int	init_semaphores(t_monitor *monitor)
 		monitor->eat_sems = sem_open("/eat_sems", O_CREAT, 0644, 0);
 		if (monitor->eat_sems == SEM_FAILED)
 		{
-			cleanup_semaphores(monitor, (int []){1, 1, 1, 1, 0});
+			cleanup_semaphores(monitor, (int []){1, 1, 1, 0});
 			return (0);
 		}
 	}
@@ -256,7 +256,7 @@ int	init_philos(t_monitor *monitor)
 	if (!monitor->philos)
 	{
 		printf("Memory allocation failed\n");
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 1, 1});
+		cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
 		return (0);
 	}
 	i = 0;
@@ -368,6 +368,9 @@ int is_alive_in_event(t_philo *philo, int event_time)
 	if (timeleft < event_time)
 	{
 		usleep(timeleft * 1000);
+		print_action(philo, "is died");
+		philo->die = DIE;
+		philo->monitor->die = DIE;
 		return (1);
 	}
 	usleep(event_time * 1000);
@@ -521,7 +524,7 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (printf("Philosopher initialization failed\n"), 1);
 	create_start_process(&monitor);
 	monitoring(&monitor);
-	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1, 1});
+	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1});
 	if(monitor.philos)
 		free(monitor.philos);
 	return (0);
