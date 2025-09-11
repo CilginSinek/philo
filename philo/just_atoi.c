@@ -33,4 +33,4 @@ int	ft_atoi(const char *str)
 		i++;
 	}
 	return (result * a);
-} // ft_usleep yapılabilir zaman algısı kayıyo
+}

@@ -65,4 +65,26 @@ typedef struct s_monitor
 	t_philo			*philos;
 }	t_monitor;
 
+//Libft
+int			ft_strlen(const char *str);
+int			ft_atoi(const char *str);
+char		*ft_strdup(const char *str);
+char		*ft_itoa(int n);
+//Print
+long int	get_time(struct timeval start);
+void		print_action(t_philo *philo, char *action);
+//Init
+int			init_monitor(t_monitor *monitor, int argc, char *argv[]);
+void		cleanup_semaphores(t_monitor *monitor, int *flags);
+void		cleanup_child(t_monitor *monitor);
+int			init_semaphores(t_monitor *monitor);
+int			init_philos(t_monitor *monitor);
+//Philos
+void		start_flag_up(t_monitor *monitor);
+int			healty_check(t_philo *philo);
+int			take_forks(t_philo *philo);
+int			is_alive_in_event(t_philo *philo, int event_time);
+void		create_start_process(t_monitor *monitor);
+void		philosopher_routine(t_philo *philo);
+
 #endif

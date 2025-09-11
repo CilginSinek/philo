@@ -1,0 +1,96 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_routine_bonus.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
+/*   Updated: 2025/09/11 17:29:51 by iduman           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "philo_bonus.h"
+
+int	healty_check(t_philo *philo)
+{
+	t_monitor	*monitor;
+
+	monitor = philo->monitor;
+	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
+	{
+		philo->die = DIE;
+		monitor->die = DIE;
+		print_action(philo, "is died");
+		return (1);
+	}
+	return (0);
+}
+
+static int	feed_philo(t_philo *philo)
+{
+	t_monitor	*monitor;
+
+	monitor = philo->monitor;
+	if (take_forks(philo))
+		return (1);
+	print_action(philo, "is eating");
+	philo->last_eat = get_time(monitor->start_time);
+	philo->eat_count++;
+	if (monitor->eat_complete != NONE && philo->eat_count == monitor->eat_limit)
+		sem_post(monitor->eat_sems);
+	usleep(monitor->eat_time * 1000);
+	sem_post(monitor->forks);
+	sem_post(monitor->forks);
+	philo->forks = 0;
+	return (0);
+}
+
+static int	sleep_philo(t_philo *philo)
+{
+	t_monitor	*monitor;
+
+	monitor = philo->monitor;
+	if (healty_check(philo))
+		return (1);
+	print_action(philo, "is sleeping");
+	if (is_alive_in_event(philo, monitor->sleep_time))
+		return (1);
+	return (0);
+}
+
+static int	think_philo(t_philo *philo)
+{
+	if (healty_check(philo))
+		return (1);
+	print_action(philo, "is thinking");
+	return (0);
+}
+
+void	philosopher_routine(t_philo *philo)
+{
+	philo->last_eat = get_time(philo->monitor->start_time);
+	if (philo->id % 2 == 0)
+		usleep(philo->monitor->eat_time * 500);
+	while (philo->die == ALIVE)
+	{
+		if (healty_check(philo))
+			break ;
+		if (feed_philo(philo))
+			break ;
+		if (sleep_philo(philo))
+			break ;
+		if (think_philo(philo))
+			break ;
+	}
+	if (philo->forks)
+	{
+		while (philo->forks)
+		{
+			sem_post(philo->monitor->forks);
+			philo->forks--;
+		}
+	}
+	cleanup_child(philo->monitor);
+	exit(0);
+}
