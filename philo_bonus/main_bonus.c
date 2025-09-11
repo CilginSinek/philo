@@ -12,6 +12,7 @@
 
 #include "philo_bonus.h"
 
+
 long int	get_time(struct timeval start)
 {
 	struct timeval	current;
@@ -115,6 +116,31 @@ char	*ft_itoa(int n)
 	return (str);
 }
 
+void ft_putchar(char c)
+{
+	write(1, &c, 1);
+}
+
+void	ft_putnbr(int n)
+{
+	long	nbr;
+
+	nbr = n;
+	if (nbr < 0)
+	{
+		nbr *= -1;
+		ft_putchar('-');
+	}
+	if (nbr >= 10)
+	{
+		ft_putnbr(nbr / 10);
+		ft_putchar((nbr % 10) + '0');
+		nbr /= 10;
+	}
+	else
+		ft_putchar(nbr + '0');
+}
+
 int	init_monitor(t_monitor *monitor, int argc, char *argv[])
 {
 	monitor->p_num = ft_atoi(argv[1]);
@@ -145,8 +171,8 @@ int	init_monitor(t_monitor *monitor, int argc, char *argv[])
  * @param flags Array indicating which semaphores were initialized
  * 			(1 if initialized, 0 otherwise)
  * @note flags[0] - forks, flags[1] - print_sem,
- * 			flags[2] - dead_sem, flags[3] - start_sem
- * 			flags[4] - eat_sems
+ * 			flags[2] - start_sem, flags[3] - eat_sems
+ * 			
  */
 void	cleanup_semaphores(t_monitor *monitor, int *flags)
 {
@@ -162,29 +188,44 @@ void	cleanup_semaphores(t_monitor *monitor, int *flags)
 	}
 	if (flags[2])
 	{
-		sem_close(monitor->dead_sem);
-		sem_unlink("/dead_sem");
-	}
-	if (flags[3])
-	{
 		sem_close(monitor->start_sem);
 		sem_unlink("/start_sem");
 	}
-	if (flags[4])
+	if (flags[3])
 	{
-		sem_close(monitor->eat_sems);
-		sem_unlink("/eat_sems");
+		if(monitor->eat_complete != NONE)
+		{
+			sem_close(monitor->eat_sems);
+			sem_unlink("/eat_sems");
+		}
 	}
+}
+
+void cleanup_child(t_monitor *monitor)
+{
+	if (monitor->forks != SEM_FAILED)
+		sem_close(monitor->forks);
+	if (monitor->print_sem != SEM_FAILED)
+		sem_close(monitor->print_sem);
+	if (monitor->start_sem != SEM_FAILED)
+		sem_close(monitor->start_sem);
+	if (monitor->eat_complete != NONE && monitor->eat_sems != SEM_FAILED)
+		sem_close(monitor->eat_sems);
+	if(monitor->philos)
+	{
+		free(monitor->philos);
+		monitor->philos = NULL;
+	}
+
 }
 
 int	init_semaphores(t_monitor *monitor)
 {
-
-    sem_unlink("/forks");
-    sem_unlink("/print_sem");
-    sem_unlink("/dead_sem");
-    sem_unlink("/start_sem");
-	sem_unlink("/eat_sems");
+    // sem_unlink("/forks");
+    // sem_unlink("/print_sem");
+    // sem_unlink("/start_sem");
+	if(monitor->eat_complete != NONE)
+		sem_unlink("/eat_sems");
 
 	monitor->forks = sem_open("/forks", O_CREAT, 0644, monitor->p_num);
 	if (monitor->forks == SEM_FAILED)
@@ -193,12 +234,6 @@ int	init_semaphores(t_monitor *monitor)
 	if (monitor->print_sem == SEM_FAILED)
 	{
 		cleanup_semaphores(monitor, (int []){1, 0, 0, 0, 0});
-		return (0);
-	}
-	monitor->dead_sem = sem_open("/dead_sem", O_CREAT, 0644, 0);
-	if (monitor->dead_sem == SEM_FAILED)
-	{
-		cleanup_semaphores(monitor, (int []){1, 1, 0, 0, 0});
 		return (0);
 	}
 	monitor->start_sem = sem_open("/start_sem", O_CREAT, 0644, 0);
@@ -228,7 +263,7 @@ int	init_philos(t_monitor *monitor)
 	if (!monitor->philos)
 	{
 		printf("Memory allocation failed\n");
-		cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
+		cleanup_semaphores(monitor, (int []){1, 1, 1, 1, 1});
 		return (0);
 	}
 	i = 0;
@@ -262,7 +297,12 @@ void print_action(t_philo *philo, char *action)
 
 	monitor = philo->monitor;
 	sem_wait(monitor->print_sem);
-	printf("%ld %d %s\n", get_time(monitor->start_time), philo->id, action);
+	ft_putnbr(get_time(monitor->start_time));
+	write(1, " ", 1);
+	ft_putnbr(philo->id);
+	write(1, " ", 1);
+	write(1, action, ft_strlen(action));
+	write(1, "\n", 1);
 	sem_post(monitor->print_sem);
 }
 
@@ -276,7 +316,6 @@ int healty_check(t_philo *philo)
 		philo->die = DIE;
 		monitor->die = DIE;
 		print_action(philo, "is died");
-		sem_post(monitor->dead_sem);
 		return (1);
 	}
 	return (0);
@@ -364,30 +403,19 @@ void	philosopher_routine(t_philo *philo)
 {
 	philo->last_eat = get_time(philo->monitor->start_time);
 	if (philo->id % 2 == 0)
-		usleep(1000);
+		usleep(philo->monitor->eat_time * 500);
 	while (philo->die == ALIVE)
 	{
 		if (healty_check(philo))
-		{
-			printf("%d healty_check break\n", philo->id);
 			break ;
-		}
 		if (feed_philo(philo))
-		{
-			printf("%d feed_philo break\n", philo->id);
 			break ;
-		}
 		if (sleep_philo(philo))
-		{
-			printf("%d sleep_philo break\n", philo->id);
 			break ;
-		}
 		if (think_philo(philo))
-		{
-			printf("%d think_philo break\n", philo->id);
 			break ;
-		}
 	}
+	cleanup_child(philo->monitor);
 	exit(0);
 }
 
@@ -437,6 +465,7 @@ pid_t eat_watcher(t_monitor *monitor)
 			sem_wait(monitor->eat_sems);
 			eat_count++;
 		}
+		cleanup_child(monitor);
 		exit(0);
 	}
 	return (eat_pid);
@@ -448,11 +477,11 @@ void	monitoring(t_monitor *monitor)
 	pid_t eat_pid;
 
 	i = 0;
+	eat_pid = -1;
 	if(monitor->eat_complete != NONE)
 	{
 		eat_pid = eat_watcher(monitor);
 		// -1 olma durumunu handle et
-		monitor->eat_complete = TRUE;
 	}
 	start_flag_up(monitor);
 	waitpid(-1, NULL, 0);
@@ -460,9 +489,13 @@ void	monitoring(t_monitor *monitor)
 	while (i < monitor->p_num)
 	{
 		kill(monitor->philos[i].pid, SIGTERM);
-		if(monitor->eat_complete == FALSE)
-			kill(eat_pid, SIGTERM);
+		waitpid(monitor->philos[i].pid, NULL, 0);
 		i++;
+	}
+	if(eat_pid != -1)
+	{
+		kill(eat_pid, SIGTERM);
+		waitpid(eat_pid, NULL, 0);
 	}
 }
 
@@ -485,6 +518,7 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 	create_start_process(&monitor);
 	monitoring(&monitor);
 	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1, 1});
-	free(monitor.philos);
+	if(monitor.philos)
+		free(monitor.philos);
 	return (0);
 }
