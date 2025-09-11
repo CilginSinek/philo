@@ -203,20 +203,13 @@ void	cleanup_semaphores(t_monitor *monitor, int *flags)
 
 void cleanup_child(t_monitor *monitor)
 {
-	if (monitor->forks != SEM_FAILED)
-		sem_close(monitor->forks);
-	if (monitor->print_sem != SEM_FAILED)
-		sem_close(monitor->print_sem);
-	if (monitor->start_sem != SEM_FAILED)
-		sem_close(monitor->start_sem);
-	if (monitor->eat_complete != NONE && monitor->eat_sems != SEM_FAILED)
-		sem_close(monitor->eat_sems);
-	if(monitor->philos)
-	{
-		free(monitor->philos);
-		monitor->philos = NULL;
-	}
-
+    sem_close(monitor->forks);
+    sem_close(monitor->print_sem);
+    sem_close(monitor->start_sem);
+    if(monitor->eat_complete != NONE)
+        sem_close(monitor->eat_sems);
+    if(monitor->philos)
+        free(monitor->philos);
 }
 
 int	init_semaphores(t_monitor *monitor)
@@ -274,6 +267,7 @@ int	init_philos(t_monitor *monitor)
 		monitor->philos[i].last_eat = 0;
 		monitor->philos[i].monitor = monitor;
 		monitor->philos[i].die = ALIVE;
+		monitor->philos[i].forks = 0;
 		i++;
 	}
 	return (1);
@@ -326,6 +320,7 @@ int take_fork(t_philo *philo, t_monitor *monitor)
 	if (healty_check(philo))
 		return (1);
 	sem_wait(monitor->forks);
+	philo->forks++;
 	print_action(philo, "has taken a fork");
 	return (0);
 }
@@ -360,6 +355,7 @@ int	feed_philo(t_philo *philo)
 	usleep(monitor->eat_time * 1000);
 	sem_post(monitor->forks);
 	sem_post(monitor->forks);
+	philo->forks = 0;
 	return (0);
 }
 
@@ -414,6 +410,14 @@ void	philosopher_routine(t_philo *philo)
 			break ;
 		if (think_philo(philo))
 			break ;
+	}
+	if(philo->forks)
+	{
+		while(philo->forks)
+		{
+			sem_post(philo->monitor->forks);
+			philo->forks--;
+		}
 	}
 	cleanup_child(philo->monitor);
 	exit(0);
@@ -488,13 +492,13 @@ void	monitoring(t_monitor *monitor)
 	i = 0;
 	while (i < monitor->p_num)
 	{
-		kill(monitor->philos[i].pid, SIGTERM);
+		kill(monitor->philos[i].pid, SIGKILL);
 		waitpid(monitor->philos[i].pid, NULL, 0);
 		i++;
 	}
 	if(eat_pid != -1)
 	{
-		kill(eat_pid, SIGTERM);
+		kill(eat_pid, SIGKILL);
 		waitpid(eat_pid, NULL, 0);
 	}
 }
