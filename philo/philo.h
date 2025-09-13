@@ -51,6 +51,7 @@ typedef struct s_monitor
 	t_philo			*philos;
 }	t_monitor;
 
+int			is_all_numaric(int argc, char **argv);
 int			ft_atoi(const char *str);
 long int	get_time(struct timeval start);
 void		print_events(pthread_mutex_t *print_mutex, int id,

@@ -60,3 +60,25 @@ void	print_action(t_philo *philo, char *action)
 	write(1, "\n", 1);
 	sem_post(monitor->print_sem);
 }
+
+int	is_all_numaric(int argc, char **argv)
+{
+	int	i;
+	int	j;
+
+	i = 1;
+	while (i < argc)
+	{
+		j = 0;
+		if (argv[i][j] == '+' || argv[i][j] == '-')
+			j++;
+		while (argv[i][j])
+		{
+			if (argv[i][j] < '0' || argv[i][j] > '9')
+				return (0);
+			j++;
+		}
+		i++;
+	}
+	return (1);
+}

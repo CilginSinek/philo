@@ -52,11 +52,11 @@ int	feed_philo(t_monitor *monitor, t_philo *philo)
 {
 	if (take_forks(monitor, philo))
 		return (1);
-	philo->last_eat = get_time(monitor->start_time);
-	philo->eat_count++;
 	print_events(&monitor->print_mutex, philo->id,
 		"is eating", monitor->start_time);
 	usleep(monitor->eat_time * 1000);
+	philo->last_eat = get_time(monitor->start_time);
+	philo->eat_count++;
 	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(&philo->left_fork);
 	return (0);

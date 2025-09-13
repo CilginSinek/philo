@@ -68,6 +68,7 @@ int			ft_strlen(const char *str);
 int			ft_atoi(const char *str);
 char		*ft_strdup(const char *str);
 char		*ft_itoa(int n);
+int			is_all_numaric(int argc, char **argv);
 //Print
 long int	get_time(struct timeval start);
 void		print_action(t_philo *philo, char *action);

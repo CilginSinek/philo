@@ -35,11 +35,11 @@ static int	feed_philo(t_philo *philo)
 	if (take_forks(philo))
 		return (1);
 	print_action(philo, "is eating");
+	usleep(monitor->eat_time * 1000);
 	philo->last_eat = get_time(monitor->start_time);
 	philo->eat_count++;
 	if (monitor->eat_complete != NONE && philo->eat_count == monitor->eat_limit)
 		sem_post(monitor->eat_sems);
-	usleep(monitor->eat_time * 1000);
 	sem_post(monitor->forks);
 	sem_post(monitor->forks);
 	philo->forks = 0;

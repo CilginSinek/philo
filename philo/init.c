@@ -14,6 +14,8 @@
 
 int	init_monitor(t_monitor *monitor, int argc, char *argv[])
 {
+	if (!is_all_numaric(argc, argv))
+		return (0);
 	monitor->p_num = ft_atoi(argv[1]);
 	monitor->die_time = ft_atoi(argv[2]);
 	monitor->eat_time = ft_atoi(argv[3]);
