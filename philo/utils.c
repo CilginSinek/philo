@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 20:30:36 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 20:30:36 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/13 10:51:09 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,4 +70,5 @@ void	cleanup_mutexes(t_monitor *monitor, int fork_count,
 		pthread_mutex_destroy(&monitor->print_mutex);
 	if (dead_init)
 		pthread_mutex_destroy(&monitor->dead_mutex);
+	free(monitor->philos);
 }
