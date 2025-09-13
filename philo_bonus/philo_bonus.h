@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:28 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 21:27:28 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/13 10:39:23 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,8 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
-# include <sys/types.h>
 # include <sys/wait.h>
 # include <semaphore.h>
-# include <pthread.h>
 # include <unistd.h>
 # include <fcntl.h>
 

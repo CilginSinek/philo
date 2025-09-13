@@ -3,7 +3,7 @@ SRC= main_bonus.c init_bonus.c libft_bonus.c \
 		philo_helper_bonus.c philo_routine_bonus.c \
 		print_bonus.c
 OBJ=$(SRC:.c=.o)
-CFLAGS=-Wall -Wextra -Werror -pthread
+CFLAGS=-Wall -Wextra -Werror
 CC=cc
 
 all:$(NAME)

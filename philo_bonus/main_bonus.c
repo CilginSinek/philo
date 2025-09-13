@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:09 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 21:27:09 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/13 10:37:16 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ static void	monitoring(t_monitor *monitor)
 {
 	pid_t	eat_pid;
 
+	eat_pid = -1;
 	if (monitor->eat_complete != NONE)
 	{
 		eat_pid = eat_watcher(monitor);
@@ -66,7 +67,8 @@ static void	monitoring(t_monitor *monitor)
 	start_flag_up(monitor);
 	waitpid(-1, NULL, 0);
 	kill_all(monitor);
-	kill(eat_pid, SIGKILL);
+	if (monitor->eat_complete != NONE)
+		kill(eat_pid, SIGKILL);
 	waitpid(eat_pid, NULL, 0);
 }
 
