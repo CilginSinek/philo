@@ -34,6 +34,7 @@ static int	feed_philo(t_philo *philo)
 	monitor = philo->monitor;
 	if (take_forks(philo))
 		return (1);
+	philo->last_eat = get_time(monitor->start_time);
 	print_action(philo, "is eating");
 	usleep(monitor->eat_time * 1000);
 	philo->last_eat = get_time(monitor->start_time);

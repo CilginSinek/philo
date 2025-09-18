@@ -54,6 +54,7 @@ int	feed_philo(t_monitor *monitor, t_philo *philo)
 		return (1);
 	print_events(&monitor->print_mutex, philo->id,
 		"is eating", monitor->start_time);
+	philo->last_eat = get_time(monitor->start_time);
 	usleep(monitor->eat_time * 1000);
 	philo->last_eat = get_time(monitor->start_time);
 	philo->eat_count++;
@@ -68,7 +69,8 @@ int	sleep_philo(t_monitor *monitor, t_philo *philo)
 		return (1);
 	print_events(&monitor->print_mutex, philo->id,
 		"is sleeping", monitor->start_time);
-	usleep(monitor->sleep_time * 1000);
+	if (is_alive_in_event(philo, monitor->sleep_time))
+		return (1);
 	return (0);
 }
 

@@ -10,6 +10,29 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "philo.h"
+
+int	is_alive_in_event(t_philo *philo, int event_time)
+{
+	int long	timeleft;
+
+	timeleft = philo->monitor->die_time - (get_time(philo->monitor->start_time)
+			- philo->last_eat);
+	if (timeleft < event_time)
+	{
+		usleep(timeleft * 1000);
+		print_events(&philo->monitor->print_mutex, philo->id, "is died",
+			philo->monitor->start_time);
+		pthread_mutex_lock(&philo->monitor->dead_mutex);
+		philo->die = DIE;
+		philo->monitor->die = DIE;
+		pthread_mutex_unlock(&philo->monitor->dead_mutex);
+		return (1);
+	}
+	usleep(event_time * 1000);
+	return (0);
+}
+
 int	is_all_numaric(int argc, char **argv)
 {
 	int	i;

@@ -58,6 +58,7 @@ void		print_events(pthread_mutex_t *print_mutex, int id,
 				char *str, struct timeval start);
 int			dead_check(t_monitor *monitor);
 int			is_full(t_monitor *monitor);
+int			is_alive_in_event(t_philo *philo, int event_time);
 
 int			init_monitor(t_monitor *monitor, int argc, char *argv[]);
 int			init_mutex(t_monitor *monitor);

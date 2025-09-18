@@ -29,6 +29,11 @@ static int	take_fork(t_philo *philo, t_monitor *monitor)
 	if (healty_check(philo))
 		return (1);
 	sem_wait(monitor->forks);
+	if (healty_check(philo))
+	{
+		sem_post(monitor->forks);
+		return (1);
+	}
 	philo->forks++;
 	print_action(philo, "has taken a fork");
 	return (0);
