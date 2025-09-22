@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:09 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/13 10:37:16 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/22 16:40:53 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,9 @@ static void	monitoring(t_monitor *monitor)
 	if (monitor->eat_complete != NONE)
 		kill(eat_pid, SIGKILL);
 	waitpid(eat_pid, NULL, 0);
+	cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
+	if (monitor->philos)
+		free(monitor->philos);
 }
 
 int	main(int argc, char *argv[])
@@ -90,8 +93,5 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (printf("Philosopher initialization failed\n"), 1);
 	create_start_process(&monitor);
 	monitoring(&monitor);
-	cleanup_semaphores(&monitor, (int []){1, 1, 1, 1});
-	if (monitor.philos)
-		free(monitor.philos);
 	return (0);
 }

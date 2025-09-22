@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:28 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/13 10:39:23 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/22 16:32:49 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <semaphore.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <pthread.h>
 
 typedef enum e_is_die
 {
@@ -79,6 +80,7 @@ void		cleanup_child(t_monitor *monitor);
 int			init_semaphores(t_monitor *monitor);
 int			init_philos(t_monitor *monitor);
 //Philos
+void		*dead_monitor(void *arg);
 void		start_flag_up(t_monitor *monitor);
 int			healty_check(t_philo *philo);
 int			take_forks(t_philo *philo);

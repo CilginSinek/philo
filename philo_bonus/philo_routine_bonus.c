@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_routine_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/11 17:29:51 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/22 18:03:26 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,10 @@ static int	think_philo(t_philo *philo)
 
 void	philosopher_routine(t_philo *philo)
 {
+	pthread_t	dead_thread;
+
 	philo->last_eat = get_time(philo->monitor->start_time);
+	pthread_create(&dead_thread, NULL, dead_monitor, philo);
 	if (philo->id % 2 == 0)
 		usleep(philo->monitor->eat_time * 500);
 	while (philo->die == ALIVE)
@@ -84,6 +87,7 @@ void	philosopher_routine(t_philo *philo)
 		if (think_philo(philo))
 			break ;
 	}
+	pthread_join(dead_thread, NULL);
 	if (philo->forks)
 	{
 		while (philo->forks)

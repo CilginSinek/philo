@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   print_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:19:15 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/11 17:19:15 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/22 16:48:08 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,9 @@ void	print_action(t_philo *philo, char *action)
 	ft_putnbr(get_time(monitor->start_time));
 	write(1, " ", 1);
 	ft_putnbr(philo->id);
+	write(1, " ", 1);
+	write(1,"pid: ",5);
+	ft_putnbr(getpid());
 	write(1, " ", 1);
 	write(1, action, ft_strlen(action));
 	write(1, "\n", 1);
