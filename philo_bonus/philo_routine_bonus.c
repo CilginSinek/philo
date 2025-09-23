@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_routine_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/22 18:03:26 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/23 18:00:40 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ int	healty_check(t_philo *philo)
 	t_monitor	*monitor;
 
 	monitor = philo->monitor;
+	if (monitor->die == DIE)
+		return (1);
 	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
 	{
 		philo->die = DIE;
@@ -78,13 +80,8 @@ void	philosopher_routine(t_philo *philo)
 		usleep(philo->monitor->eat_time * 500);
 	while (philo->die == ALIVE)
 	{
-		if (healty_check(philo))
-			break ;
-		if (feed_philo(philo))
-			break ;
-		if (sleep_philo(philo))
-			break ;
-		if (think_philo(philo))
+		if (healty_check(philo) || feed_philo(philo)
+			|| sleep_philo(philo) || think_philo(philo))
 			break ;
 	}
 	pthread_join(dead_thread, NULL);
