@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 20:28:31 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 20:28:31 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/28 16:08:20 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,13 @@ int	feed_philo(t_monitor *monitor, t_philo *philo)
 		return (1);
 	print_events(&monitor->print_mutex, philo->id,
 		"is eating", monitor->start_time);
+	pthread_mutex_lock(&philo->eat_mutex);
 	philo->last_eat = get_time(monitor->start_time);
+	pthread_mutex_unlock(&philo->eat_mutex);
 	usleep(monitor->eat_time * 1000);
-	philo->last_eat = get_time(monitor->start_time);
+	pthread_mutex_lock(&philo->eat_mutex);
 	philo->eat_count++;
+	pthread_mutex_unlock(&philo->eat_mutex);
 	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(&philo->left_fork);
 	return (0);

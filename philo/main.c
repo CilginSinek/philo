@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 20:19:11 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/03 19:15:36 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/28 16:27:20 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,18 @@ void	*monitor_routine(void *arg)
 		i = 0;
 		while (i < monitor->p_num && monitor->die == ALIVE)
 		{
+			pthread_mutex_lock(&monitor->philos[i].eat_mutex);
 			if (get_time(monitor->start_time) - monitor->philos[i].last_eat
 				> monitor->die_time)
+			{
+				pthread_mutex_unlock(&monitor->philos[i].eat_mutex);
 				return (setdead(monitor, i), NULL);
+			}
+			pthread_mutex_unlock(&monitor->philos[i].eat_mutex);
 			i++;
 		}
 		if (is_full(monitor))
-			break ;
+			return (NULL);
 		usleep(1000);
 	}
 	return (NULL);
@@ -106,6 +111,6 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		one_philo_event(&monitor);
 	else
 		init_philos_threads(&monitor);
-	cleanup_mutexes(&monitor, monitor.p_num, 1, 1);
+	cleanup_mutexes(&monitor, (int []){monitor.p_num, 1, 1, monitor.p_num});
 	return (0);
 }

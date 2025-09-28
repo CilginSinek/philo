@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/23 18:00:40 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/26 07:15:58 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ static int	feed_philo(t_philo *philo)
 	philo->last_eat = get_time(monitor->start_time);
 	print_action(philo, "is eating");
 	usleep(monitor->eat_time * 1000);
-	philo->last_eat = get_time(monitor->start_time);
 	philo->eat_count++;
 	if (monitor->eat_complete != NONE && philo->eat_count == monitor->eat_limit)
 		sem_post(monitor->eat_sems);

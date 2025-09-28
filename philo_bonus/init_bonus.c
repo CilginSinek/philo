@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:19:23 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/11 17:19:23 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/29 00:28:52 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ void	cleanup_child(t_monitor *monitor)
 
 int	init_semaphores(t_monitor *monitor)
 {
+	//* yeni bsy yapmam gerek burda hata verio
 	cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
 	monitor->forks = sem_open("/forks", O_CREAT, 0644, monitor->p_num);
 	if (monitor->forks == SEM_FAILED)

@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 20:19:14 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 20:19:14 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/28 16:25:10 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,23 @@ int	init_mutex(t_monitor *monitor)
 	while (i < monitor->p_num)
 	{
 		if (pthread_mutex_init(&monitor->philos[i].left_fork, NULL) != 0)
-			return (cleanup_mutexes(monitor, i, 0, 0), 1);
+			return (cleanup_mutexes(monitor, (int []){i, 0, 0, 0}), 1);
 		monitor->philos[i].right_fork = &monitor->philos[
 			(i + 1) % monitor->p_num].left_fork;
 		i++;
 	}
 	if (pthread_mutex_init(&monitor->print_mutex, NULL) != 0)
-		return (cleanup_mutexes(monitor, i, 0, 0), 1);
+		return (cleanup_mutexes(monitor, (int []){i, 1, 0, 0}), 1);
 	if (pthread_mutex_init(&monitor->dead_mutex, NULL) != 0)
-		return (cleanup_mutexes(monitor, i, 1, 0), 1);
+		return (cleanup_mutexes(monitor, (int []){i, 1, 1, 0}), 1);
+	i = 0;
+	while (i < monitor->p_num)
+	{
+		if (pthread_mutex_init(&monitor->philos[i].eat_mutex, NULL) != 0)
+			return (cleanup_mutexes(monitor,
+					(int []){monitor->p_num, 1, 1, i}), 1);
+		i++;
+	}
 	return (0);
 }
 

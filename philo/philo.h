@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 20:45:56 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/04 20:45:56 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/28 16:11:50 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_philo
 	long int			last_eat;
 	pthread_mutex_t		*right_fork;
 	pthread_mutex_t		left_fork;
+	pthread_mutex_t		eat_mutex;
 	pthread_t			thread;
 	struct s_monitor	*monitor;
 	t_is_die			die;
@@ -63,8 +64,7 @@ int			is_alive_in_event(t_philo *philo, int event_time);
 int			init_monitor(t_monitor *monitor, int argc, char *argv[]);
 int			init_mutex(t_monitor *monitor);
 void		init_philos_threads(t_monitor *monitor);
-void		cleanup_mutexes(t_monitor *monitor, int fork_count,
-				int print_init, int dead_init);
+void		cleanup_mutexes(t_monitor *monitor, int *args);
 
 int			feed_philo(t_monitor *monitor, t_philo *philo);
 int			sleep_philo(t_monitor *monitor, t_philo *philo);
