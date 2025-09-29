@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:28 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/22 16:32:49 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/29 06:36:15 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ typedef struct s_philo
 	struct s_monitor	*monitor;
 	int					forks;
 	int					print;
+	sem_t				*eat_mutex;
+	char 				*eat_sem_name;
 	t_is_die			die;
 }	t_philo;
 
@@ -60,6 +62,7 @@ typedef struct s_monitor
 	sem_t			*forks;
 	sem_t			*print_sem;
 	sem_t			*eat_sems;
+	char			*sem_names[4];
 	t_boolean		eat_complete;
 	t_philo			*philos;
 }	t_monitor;
@@ -79,6 +82,9 @@ void		cleanup_semaphores(t_monitor *monitor, int *flags);
 void		cleanup_child(t_monitor *monitor);
 int			init_semaphores(t_monitor *monitor);
 int			init_philos(t_monitor *monitor);
+char		*init_name(char *base, int id);
+int			get_time_six(void);
+void free_names(t_monitor *monitor);
 //Philos
 void		*dead_monitor(void *arg);
 void		start_flag_up(t_monitor *monitor);

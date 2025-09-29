@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 16:26:43 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/23 17:58:14 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/29 06:33:42 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,17 @@ void	*dead_monitor(void *arg)
 	while (philo->die == ALIVE)
 	{
 		usleep(100);
+		sem_wait(philo->eat_mutex);
 		if (get_time(philo->monitor->start_time
 			) - philo->last_eat > philo->monitor->die_time)
 		{
 			philo->die = DIE;
 			philo->monitor->die = DIE;
 			print_action(philo, "is died");
+			sem_post(philo->eat_mutex);
 			return (NULL);
 		}
+		sem_post(philo->eat_mutex);
 	}
 	return (NULL);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:09 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/22 16:40:53 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/29 06:41:44 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ static void	monitoring(t_monitor *monitor)
 		kill(eat_pid, SIGKILL);
 	waitpid(eat_pid, NULL, 0);
 	cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
+	free_names(monitor);
 	if (monitor->philos)
 		free(monitor->philos);
 }
