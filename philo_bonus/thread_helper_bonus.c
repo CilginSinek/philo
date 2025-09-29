@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 16:26:43 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 06:33:42 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/29 21:44:20 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	*dead_monitor(void *arg)
 	philo = (t_philo *)arg;
 	while (philo->die == ALIVE)
 	{
-		usleep(100);
+		usleep(1000);
 		sem_wait(philo->eat_mutex);
 		if (get_time(philo->monitor->start_time
 			) - philo->last_eat > philo->monitor->die_time)
