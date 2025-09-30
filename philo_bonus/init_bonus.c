@@ -74,8 +74,21 @@ void	cleanup_semaphores(t_monitor *monitor, int *flags)
 	}
 }
 
-void	cleanup_child(t_monitor *monitor)
+static void	clear_eat_mutex(t_philo *philo)
 {
+	if (philo->eat_mutex)
+	{
+		sem_close(philo->eat_mutex);
+		sem_unlink(philo->eat_sem_name);
+	}
+	if (philo->eat_sem_name)
+		free(philo->eat_sem_name);
+}
+
+void	cleanup_child(t_monitor *monitor, t_philo *philo)
+{
+	if (philo != NULL)
+		clear_eat_mutex(philo);
 	free_names(monitor);
 	sem_close(monitor->forks);
 	sem_close(monitor->print_sem);

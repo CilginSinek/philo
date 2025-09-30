@@ -76,48 +76,11 @@ static int	think_philo(t_philo *philo)
 	return (0);
 }
 
-int init_eat_mutex(t_philo *philo)
-{
-	philo->eat_sem_name = init_name("/eat_mutex", get_time_six() + philo->id);
-	if (!philo->eat_sem_name)
-		return (0);
-	philo->eat_mutex = sem_open(philo->eat_sem_name, O_CREAT, 0644, 1);
-	if (philo->eat_mutex == SEM_FAILED)
-	{
-		free(philo->eat_sem_name);
-		return (0);
-	}
-	return (1);
-}
-
-void clear_eat_mutex(t_philo *philo)
-{
-	if (philo->eat_mutex)
-	{
-		sem_close(philo->eat_mutex);
-		sem_unlink(philo->eat_sem_name);
-	}
-	if (philo->eat_sem_name)
-		free(philo->eat_sem_name);
-}
-
 void	philosopher_routine(t_philo *philo)
 {
 	pthread_t	dead_thread;
 
-	if(!init_eat_mutex(philo))
-	{
-		philo->die = DIE;
-		print_action(philo, "semaphore init failed");
-		cleanup_child(philo->monitor);
-		exit(1);
-	}
-	sem_wait(philo->eat_mutex);
-	philo->last_eat = get_time(philo->monitor->start_time);
-	sem_post(philo->eat_mutex);
-	pthread_create(&dead_thread, NULL, dead_monitor, philo);
-	if (philo->id % 2 == 0)
-		usleep(philo->monitor->eat_time * 500);
+	init_philosopher_routine(philo, &dead_thread);
 	while (philo->die == ALIVE)
 	{
 		if (healty_check(philo) || feed_philo(philo)
@@ -126,14 +89,8 @@ void	philosopher_routine(t_philo *philo)
 	}
 	pthread_join(dead_thread, NULL);
 	if (philo->forks)
-	{
-		while (philo->forks)
-		{
+		while (philo->forks--)
 			sem_post(philo->monitor->forks);
-			philo->forks--;
-		}
-	}
-	cleanup_child(philo->monitor);
-	clear_eat_mutex(philo);
+	cleanup_child(philo->monitor, philo);
 	exit(0);
 }

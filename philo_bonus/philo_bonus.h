@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:27:28 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 06:36:15 by iduman           ###   ########.fr       */
+/*   Updated: 2025/09/30 20:19:06 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ typedef struct s_philo
 	int					forks;
 	int					print;
 	sem_t				*eat_mutex;
-	char 				*eat_sem_name;
+	char				*eat_sem_name;
 	t_is_die			die;
 }	t_philo;
 
@@ -79,12 +79,13 @@ void		print_action(t_philo *philo, char *action);
 //Init
 int			init_monitor(t_monitor *monitor, int argc, char *argv[]);
 void		cleanup_semaphores(t_monitor *monitor, int *flags);
-void		cleanup_child(t_monitor *monitor);
+void		cleanup_child(t_monitor *monitor, t_philo *philo);
 int			init_semaphores(t_monitor *monitor);
 int			init_philos(t_monitor *monitor);
 char		*init_name(char *base, int id);
 int			get_time_six(void);
-void free_names(t_monitor *monitor);
+void		free_names(t_monitor *monitor);
+void		init_philosopher_routine(t_philo *philo, pthread_t *dead_thread);
 //Philos
 void		*dead_monitor(void *arg);
 void		start_flag_up(t_monitor *monitor);

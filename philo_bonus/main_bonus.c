@@ -31,7 +31,7 @@ static pid_t	eat_watcher(t_monitor *monitor)
 			sem_wait(monitor->eat_sems);
 			eat_count++;
 		}
-		cleanup_child(monitor);
+		cleanup_child(monitor, NULL);
 		exit(0);
 	}
 	return (eat_pid);

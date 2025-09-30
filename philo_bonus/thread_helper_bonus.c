@@ -34,3 +34,42 @@ void	*dead_monitor(void *arg)
 	}
 	return (NULL);
 }
+
+int	get_time_six(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000000 + tv.tv_usec);
+}
+
+static int	init_eat_mutex(t_philo *philo)
+{
+	philo->eat_sem_name = init_name("/eat_mutex", get_time_six() + philo->id);
+	if (!philo->eat_sem_name)
+		return (0);
+	philo->eat_mutex = sem_open(philo->eat_sem_name, O_CREAT, 0644, 1);
+	if (philo->eat_mutex == SEM_FAILED)
+	{
+		free(philo->eat_sem_name);
+		return (0);
+	}
+	return (1);
+}
+
+void	init_philosopher_routine(t_philo *philo, pthread_t *dead_thread)
+{
+	if (!init_eat_mutex(philo))
+	{
+		philo->die = DIE;
+		print_action(philo, "semaphore init failed");
+		cleanup_child(philo->monitor, philo);
+		exit(1);
+	}
+	sem_wait(philo->eat_mutex);
+	philo->last_eat = get_time(philo->monitor->start_time);
+	sem_post(philo->eat_mutex);
+	pthread_create(dead_thread, NULL, dead_monitor, philo);
+	if (philo->id % 2 == 0)
+		usleep(philo->monitor->eat_time * 500);
+}
