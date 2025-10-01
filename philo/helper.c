@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:06:10 by iduman            #+#    #+#             */
-/*   Updated: 2025/10/01 14:05:00 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 14:08:39 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,6 @@ void	*one_philo_event(void *arg)
 	t_monitor		*monitor;
 
 	monitor = (t_monitor *)arg;
-
 	gettimeofday(&start_time, NULL);
 	print_events(&monitor->print_mutex, 1, "has taken a fork",
 		start_time);

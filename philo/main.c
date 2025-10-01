@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 20:19:11 by iduman            #+#    #+#             */
-/*   Updated: 2025/10/01 14:04:50 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 14:08:17 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,6 @@ void	*philo_routine(void *arg)
 	}
 	return (NULL);
 }
-
-
 
 void	one_philo(t_monitor *monitor)
 {
