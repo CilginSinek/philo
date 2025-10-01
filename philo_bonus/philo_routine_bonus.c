@@ -80,6 +80,7 @@ void	philosopher_routine(t_philo *philo)
 {
 	pthread_t	dead_thread;
 
+	gettimeofday(&philo->monitor->start_time, NULL);
 	init_philosopher_routine(philo, &dead_thread);
 	while (philo->die == ALIVE)
 	{
