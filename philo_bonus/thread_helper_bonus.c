@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   thread_helper_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/22 16:26:43 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 21:44:20 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 13:54:04 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	*dead_monitor(void *arg)
 		{
 			philo->die = DIE;
 			philo->monitor->die = DIE;
-			print_action(philo, "is died");
+			print_action(philo, "died");
 			sem_post(philo->eat_mutex);
 			return (NULL);
 		}

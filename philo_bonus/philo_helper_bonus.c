@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_helper_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:33:46 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/11 17:33:46 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 13:53:31 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ static int	take_fork(t_philo *philo, t_monitor *monitor)
 {
 	if (healty_check(philo))
 		return (1);
+	if (monitor->p_num == 1 && philo->forks == 1)
+		return (is_alive_in_event(philo, monitor->die_time), 1);
 	sem_wait(monitor->forks);
 	if (healty_check(philo))
 	{
@@ -63,7 +65,7 @@ int	is_alive_in_event(t_philo *philo, int event_time)
 	if (timeleft < event_time)
 	{
 		usleep(timeleft * 1000);
-		print_action(philo, "is died");
+		print_action(philo, "died");
 		philo->die = DIE;
 		philo->monitor->die = DIE;
 		return (1);

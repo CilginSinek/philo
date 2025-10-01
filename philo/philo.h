@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 20:45:56 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/28 16:11:50 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 14:00:46 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,5 +72,6 @@ int			think_philo(t_monitor *monitor, t_philo *philo);
 
 void		*monitor_routine(void *arg);
 void		*philo_routine(void *arg);
+void		*one_philo_event(void *arg);
 
 #endif

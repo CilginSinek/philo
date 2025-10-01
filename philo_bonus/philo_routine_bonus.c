@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_routine_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 06:33:15 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 13:54:22 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	healty_check(t_philo *philo)
 	{
 		philo->die = DIE;
 		monitor->die = DIE;
-		print_action(philo, "is died");
+		print_action(philo, "died");
 		sem_post(philo->eat_mutex);
 		return (1);
 	}
@@ -84,7 +84,7 @@ void	philosopher_routine(t_philo *philo)
 	init_philosopher_routine(philo, &dead_thread);
 	while (philo->die == ALIVE)
 	{
-		if (healty_check(philo) || feed_philo(philo)
+		if (feed_philo(philo)
 			|| sleep_philo(philo) || think_philo(philo))
 			break ;
 	}
