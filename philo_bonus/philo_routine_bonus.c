@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/10/01 13:54:22 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/11 18:39:55 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ static int	think_philo(t_philo *philo)
 	if (healty_check(philo))
 		return (1);
 	print_action(philo, "is thinking");
+	usleep(200);
 	return (0);
 }
 
