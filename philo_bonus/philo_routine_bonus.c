@@ -19,18 +19,7 @@ int	healty_check(t_philo *philo)
 
 	monitor = philo->monitor;
 	sem_wait(philo->eat_mutex);
-<<<<<<< HEAD
 	result = (philo->die == DIE || monitor->die == DIE);
-=======
-	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
-	{
-		philo->die = DIE;
-		monitor->die = DIE;
-		print_action(philo, "died");
-		sem_post(philo->eat_mutex);
-		return (1);
-	}
->>>>>>> 2e1e0a0693e9268d18a3636c02451e50976bf610
 	sem_post(philo->eat_mutex);
 	return (result);
 }

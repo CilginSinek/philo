@@ -28,13 +28,8 @@ static int	take_fork(t_philo *philo, t_monitor *monitor)
 {
 	if (healty_check(philo))
 		return (1);
-<<<<<<< HEAD
 	if (philo->forks == 1 && monitor->p_num == 1)
 		return (1);
-=======
-	if (monitor->p_num == 1 && philo->forks == 1)
-		return (is_alive_in_event(philo, monitor->die_time), 1);
->>>>>>> 2e1e0a0693e9268d18a3636c02451e50976bf610
 	sem_wait(monitor->forks);
 	if (healty_check(philo))
 	{
@@ -72,12 +67,6 @@ int	is_alive_in_event(t_philo *philo, int event_time)
 	if (timeleft < event_time)
 	{
 		usleep(timeleft * 1000);
-<<<<<<< HEAD
-=======
-		print_action(philo, "died");
-		philo->die = DIE;
-		philo->monitor->die = DIE;
->>>>>>> 2e1e0a0693e9268d18a3636c02451e50976bf610
 		return (1);
 	}
 	usleep(event_time * 1000);
