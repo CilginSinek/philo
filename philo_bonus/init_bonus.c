@@ -96,7 +96,10 @@ void	cleanup_child(t_monitor *monitor, t_philo *philo)
 	if (monitor->eat_complete != NONE)
 		sem_close(monitor->eat_sems);
 	if (monitor->philos)
+	{
 		free(monitor->philos);
+		monitor->philos = NULL;
+	}
 }
 
 int	init_philos(t_monitor *monitor)

@@ -28,6 +28,8 @@ static int	take_fork(t_philo *philo, t_monitor *monitor)
 {
 	if (healty_check(philo))
 		return (1);
+	if (philo->forks == 1 && monitor->p_num == 1)
+		return (1);
 	sem_wait(monitor->forks);
 	if (healty_check(philo))
 	{
@@ -58,14 +60,13 @@ int	is_alive_in_event(t_philo *philo, int event_time)
 {
 	int long	timeleft;
 
+	sem_wait(philo->eat_mutex);
 	timeleft = philo->monitor->die_time - (get_time(philo->monitor->start_time)
 			- philo->last_eat);
+	sem_post(philo->eat_mutex);
 	if (timeleft < event_time)
 	{
 		usleep(timeleft * 1000);
-		print_action(philo, "is died");
-		philo->die = DIE;
-		philo->monitor->die = DIE;
 		return (1);
 	}
 	usleep(event_time * 1000);

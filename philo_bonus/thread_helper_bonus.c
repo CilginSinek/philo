@@ -14,20 +14,26 @@
 
 void	*dead_monitor(void *arg)
 {
-	t_philo	*philo;
+	t_philo		*philo;
+	long int	time_since_eat;
+	int			is_alive;
 
 	philo = (t_philo *)arg;
-	while (philo->die == ALIVE)
+	is_alive = 1;
+	while (is_alive)
 	{
 		usleep(1000);
 		sem_wait(philo->eat_mutex);
-		if (get_time(philo->monitor->start_time
-			) - philo->last_eat > philo->monitor->die_time)
+		is_alive = (philo->die == ALIVE);
+		time_since_eat = get_time(philo->monitor->start_time) - philo->last_eat;
+		if (time_since_eat > philo->monitor->die_time)
 		{
 			philo->die = DIE;
 			philo->monitor->die = DIE;
-			print_action(philo, "is died");
 			sem_post(philo->eat_mutex);
+			sem_wait(philo->monitor->print_sem);
+			printf("%ld %d died\n", get_time(philo->monitor->start_time),
+				philo->id);
 			return (NULL);
 		}
 		sem_post(philo->eat_mutex);

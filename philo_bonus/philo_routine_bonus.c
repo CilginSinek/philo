@@ -14,22 +14,14 @@
 
 int	healty_check(t_philo *philo)
 {
+	int			result;
 	t_monitor	*monitor;
 
 	monitor = philo->monitor;
-	if (monitor->die == DIE)
-		return (1);
 	sem_wait(philo->eat_mutex);
-	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
-	{
-		philo->die = DIE;
-		monitor->die = DIE;
-		print_action(philo, "is died");
-		sem_post(philo->eat_mutex);
-		return (1);
-	}
+	result = (philo->die == DIE || monitor->die == DIE);
 	sem_post(philo->eat_mutex);
-	return (0);
+	return (result);
 }
 
 static int	feed_philo(t_philo *philo)
@@ -79,8 +71,8 @@ static int	think_philo(t_philo *philo)
 void	philosopher_routine(t_philo *philo)
 {
 	pthread_t	dead_thread;
+	int			exit_status;
 
-	gettimeofday(&philo->monitor->start_time, NULL);
 	init_philosopher_routine(philo, &dead_thread);
 	while (philo->die == ALIVE)
 	{
@@ -92,6 +84,9 @@ void	philosopher_routine(t_philo *philo)
 	if (philo->forks)
 		while (philo->forks--)
 			sem_post(philo->monitor->forks);
+	exit_status = (philo->die == DIE);
 	cleanup_child(philo->monitor, philo);
+	if (exit_status)
+		exit(1);
 	exit(0);
 }

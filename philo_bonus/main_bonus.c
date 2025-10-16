@@ -50,6 +50,26 @@ static void	kill_all(t_monitor *monitor)
 	}
 }
 
+static void	wait_and_kill(t_monitor *monitor, pid_t eat_pid)
+{
+	int		status;
+	pid_t	wpid;
+
+	wpid = waitpid(-1, &status, 0);
+	if (wpid > 0)
+	{
+		if (wpid != eat_pid)
+		{
+			if (eat_pid != -1)
+			{
+				kill(eat_pid, SIGKILL);
+				waitpid(eat_pid, NULL, 0);
+			}
+			kill_all(monitor);
+		}
+	}
+}
+
 static void	monitoring(t_monitor *monitor)
 {
 	pid_t	eat_pid;
@@ -65,11 +85,7 @@ static void	monitoring(t_monitor *monitor)
 		}
 	}
 	start_flag_up(monitor);
-	waitpid(-1, NULL, 0);
-	kill_all(monitor);
-	if (monitor->eat_complete != NONE)
-		kill(eat_pid, SIGKILL);
-	waitpid(eat_pid, NULL, 0);
+	wait_and_kill(monitor, eat_pid);
 	cleanup_semaphores(monitor, (int []){1, 1, 1, 1});
 	free_names(monitor);
 	if (monitor->philos)
