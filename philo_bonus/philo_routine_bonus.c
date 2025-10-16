@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_routine_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:29:51 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 06:33:15 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/11 18:39:55 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,18 @@ int	healty_check(t_philo *philo)
 
 	monitor = philo->monitor;
 	sem_wait(philo->eat_mutex);
+<<<<<<< HEAD
 	result = (philo->die == DIE || monitor->die == DIE);
+=======
+	if (get_time(monitor->start_time) - philo->last_eat > monitor->die_time)
+	{
+		philo->die = DIE;
+		monitor->die = DIE;
+		print_action(philo, "died");
+		sem_post(philo->eat_mutex);
+		return (1);
+	}
+>>>>>>> 2e1e0a0693e9268d18a3636c02451e50976bf610
 	sem_post(philo->eat_mutex);
 	return (result);
 }
@@ -65,6 +76,7 @@ static int	think_philo(t_philo *philo)
 	if (healty_check(philo))
 		return (1);
 	print_action(philo, "is thinking");
+	usleep(200);
 	return (0);
 }
 
@@ -76,7 +88,7 @@ void	philosopher_routine(t_philo *philo)
 	init_philosopher_routine(philo, &dead_thread);
 	while (philo->die == ALIVE)
 	{
-		if (healty_check(philo) || feed_philo(philo)
+		if (feed_philo(philo)
 			|| sleep_philo(philo) || think_philo(philo))
 			break ;
 	}

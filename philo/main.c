@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 20:19:11 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/28 16:27:20 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/01 14:08:17 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ static void	setdead(t_monitor *monitor, int i)
 	monitor->die = DIE;
 	monitor->philos[i].die = DIE;
 	print_events(&monitor->print_mutex, monitor->philos[i].id,
-		"is died", monitor->start_time);
+		"died", monitor->start_time);
 	pthread_mutex_unlock(&monitor->dead_mutex);
 }
 
@@ -74,15 +74,12 @@ void	*philo_routine(void *arg)
 	return (NULL);
 }
 
-void	one_philo_event(t_monitor *monitor)
+void	one_philo(t_monitor *monitor)
 {
-	struct timeval	start_time;
+	pthread_t	one_thread;
 
-	gettimeofday(&start_time, NULL);
-	print_events(&monitor->print_mutex, 1, "has taken a fork",
-		start_time);
-	usleep(monitor->die_time * 1000);
-	print_events(&monitor->print_mutex, 1, "is died", start_time);
+	pthread_create(&one_thread, NULL, one_philo_event, monitor);
+	pthread_join(one_thread, NULL);
 }
 
 int	main(int argc, char *argv[])
@@ -108,7 +105,7 @@ time_to_sleep number_of_times_each_philosopher_must_eat(optional)\n");
 		return (1);
 	}
 	if (monitor.p_num == 1)
-		one_philo_event(&monitor);
+		one_philo(&monitor);
 	else
 		init_philos_threads(&monitor);
 	cleanup_mutexes(&monitor, (int []){monitor.p_num, 1, 1, monitor.p_num});
