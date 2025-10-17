@@ -58,7 +58,9 @@ static void	wait_and_kill(t_monitor *monitor, pid_t eat_pid)
 	wpid = waitpid(-1, &status, 0);
 	if (wpid > 0)
 	{
-		if (wpid != eat_pid)
+		if (wpid == eat_pid)
+			kill_all(monitor);
+		else
 		{
 			if (eat_pid != -1)
 			{
