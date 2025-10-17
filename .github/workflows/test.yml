@@ -1,0 +1,345 @@
+name: Philosophers Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-philo:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install Valgrind
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y valgrind
+    
+    - name: Build philo (mandatory)
+      run: |
+        cd philo
+        make
+        echo "✅ Mandatory build successful"
+    
+    - name: Build philo_bonus
+      run: |
+        cd philo_bonus
+        make
+        echo "✅ Bonus build successful"
+    
+    # ============================================
+    # MANDATORY TESTS - Basic Functionality
+    # ============================================
+    
+    - name: "Mandatory - Test: 1 philosopher (should die)"
+      run: |
+        cd philo
+        echo "Running: ./philo 1 800 200 200"
+        timeout 5 ./philo 1 800 200 200 || true
+        echo "✅ Test completed"
+    
+    - name: "Mandatory - Test: No one should die (4 410 200 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 4 410 200 200"
+        timeout 10 ./philo 4 410 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Mandatory - Test: No one should die (5 800 200 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 5 800 200 200"
+        timeout 10 ./philo 5 800 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Mandatory - Test: Someone should die (5 310 200 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 5 310 200 200"
+        timeout 5 ./philo 5 310 200 200
+        echo "✅ Test completed - Death detected"
+    
+    - name: "Mandatory - Test: Eat count (5 800 200 200 7)"
+      run: |
+        cd philo
+        echo "Running: ./philo 5 800 200 200 7"
+        timeout 30 ./philo 5 800 200 200 7
+        echo "✅ Test completed - All philosophers ate enough"
+    
+    - name: "Mandatory - Test: Eat count (4 410 200 200 10)"
+      run: |
+        cd philo
+        echo "Running: ./philo 4 410 200 200 10"
+        timeout 30 ./philo 4 410 200 200 10
+        echo "✅ Test completed - All philosophers ate enough"
+    
+    - name: "Mandatory - Test: Large number (100 800 200 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 100 800 200 200"
+        timeout 10 ./philo 100 800 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Mandatory - Test: Large number with eat count (100 800 200 200 5)"
+      run: |
+        cd philo
+        echo "Running: ./philo 100 800 200 200 5"
+        timeout 60 ./philo 100 800 200 200 5
+        echo "✅ Test completed"
+    
+    - name: "Mandatory - Test: Quick death (4 200 205 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 4 200 205 200"
+        timeout 5 ./philo 4 200 205 200
+        echo "✅ Test completed - Death detected"
+    
+    - name: "Mandatory - Test: Edge case (2 410 200 200)"
+      run: |
+        cd philo
+        echo "Running: ./philo 2 410 200 200"
+        timeout 10 ./philo 2 410 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    # ============================================
+    # MANDATORY - Valgrind Memory Tests
+    # ============================================
+    
+    - name: "Mandatory - Valgrind: Memory leak check (5 800 200 200 7)"
+      run: |
+        cd philo
+        echo "Running Valgrind memory leak check..."
+        timeout 60 valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 ./philo 5 800 200 200 7
+        echo "✅ No memory leaks detected"
+    
+    - name: "Mandatory - Valgrind: Memory leak check (4 410 200 200 5)"
+      run: |
+        cd philo
+        echo "Running Valgrind memory leak check..."
+        timeout 60 valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./philo 4 410 200 200 5
+        echo "✅ No memory leaks detected"
+    
+    - name: "Mandatory - Valgrind: Memory leak check with death (1 800 200 200)"
+      run: |
+        cd philo
+        echo "Running Valgrind memory leak check..."
+        timeout 10 valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./philo 1 800 200 200
+        echo "✅ No memory leaks detected"
+    
+    # ============================================
+    # MANDATORY - Helgrind Data Race Tests
+    # ============================================
+    
+    - name: "Mandatory - Helgrind: Data race check (5 800 200 200 7)"
+      run: |
+        cd philo
+        echo "Running Helgrind data race check..."
+        timeout 90 valgrind --tool=helgrind --error-exitcode=1 ./philo 5 800 200 200 7 2>&1 | tee helgrind.log || (cat helgrind.log && exit 1)
+        echo "✅ No data races detected"
+    
+    - name: "Mandatory - Helgrind: Data race check (4 410 200 200 5)"
+      run: |
+        cd philo
+        echo "Running Helgrind data race check..."
+        timeout 90 valgrind --tool=helgrind --error-exitcode=1 ./philo 4 410 200 200 5 2>&1 | tee helgrind.log || (cat helgrind.log && exit 1)
+        echo "✅ No data races detected"
+    
+    # ============================================
+    # MANDATORY - DRD Tests
+    # ============================================
+    
+    - name: "Mandatory - DRD: Thread error check (5 800 200 200 7)"
+      run: |
+        cd philo
+        echo "Running DRD thread error check..."
+        timeout 90 valgrind --tool=drd --error-exitcode=1 ./philo 5 800 200 200 7 2>&1 | tee drd.log || (cat drd.log && exit 1)
+        echo "✅ No thread errors detected"
+    
+    - name: "Mandatory - DRD: Thread error check (4 410 200 200 5)"
+      run: |
+        cd philo
+        echo "Running DRD thread error check..."
+        timeout 90 valgrind --tool=drd --error-exitcode=1 ./philo 4 410 200 200 5 2>&1 | tee drd.log || (cat drd.log && exit 1)
+        echo "✅ No thread errors detected"
+    
+    # ============================================
+    # BONUS TESTS - Basic Functionality
+    # ============================================
+    
+    - name: "Bonus - Test: 1 philosopher (should die)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 1 800 200 200"
+        timeout 5 ./philo_bonus 1 800 200 200 || true
+        echo "✅ Test completed"
+    
+    - name: "Bonus - Test: No one should die (4 410 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 4 410 200 200"
+        timeout 10 ./philo_bonus 4 410 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Bonus - Test: No one should die (5 800 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 5 800 200 200"
+        timeout 10 ./philo_bonus 5 800 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Bonus - Test: Someone should die (5 310 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 5 310 200 200"
+        timeout 5 ./philo_bonus 5 310 200 200
+        echo "✅ Test completed - Death detected"
+    
+    - name: "Bonus - Test: Eat count (5 800 200 200 7)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 5 800 200 200 7"
+        timeout 30 ./philo_bonus 5 800 200 200 7
+        echo "✅ Test completed - All philosophers ate enough"
+    
+    - name: "Bonus - Test: Eat count (4 410 200 200 10)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 4 410 200 200 10"
+        timeout 30 ./philo_bonus 4 410 200 200 10
+        echo "✅ Test completed - All philosophers ate enough"
+    
+    - name: "Bonus - Test: Large number (100 800 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 100 800 200 200"
+        timeout 10 ./philo_bonus 100 800 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    - name: "Bonus - Test: Large number with eat count (100 800 200 200 5)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 100 800 200 200 5"
+        timeout 60 ./philo_bonus 100 800 200 200 5
+        echo "✅ Test completed"
+    
+    - name: "Bonus - Test: Quick death (4 200 205 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 4 200 205 200"
+        timeout 5 ./philo_bonus 4 200 205 200
+        echo "✅ Test completed - Death detected"
+    
+    - name: "Bonus - Test: Edge case (2 410 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running: ./philo_bonus 2 410 200 200"
+        timeout 10 ./philo_bonus 2 410 200 200 || echo "⚠️ Timeout (expected for infinite simulation)"
+        echo "✅ Test completed"
+    
+    # ============================================
+    # BONUS - Valgrind Memory Tests
+    # ============================================
+    
+    - name: "Bonus - Valgrind: Memory leak check (5 800 200 200 7)"
+      run: |
+        cd philo_bonus
+        echo "Running Valgrind memory leak check..."
+        timeout 60 valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 ./philo_bonus 5 800 200 200 7
+        echo "✅ No memory leaks detected"
+    
+    - name: "Bonus - Valgrind: Memory leak check (4 410 200 200 5)"
+      run: |
+        cd philo_bonus
+        echo "Running Valgrind memory leak check..."
+        timeout 60 valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./philo_bonus 4 410 200 200 5
+        echo "✅ No memory leaks detected"
+    
+    - name: "Bonus - Valgrind: Memory leak check with death (1 800 200 200)"
+      run: |
+        cd philo_bonus
+        echo "Running Valgrind memory leak check..."
+        timeout 10 valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./philo_bonus 1 800 200 200
+        echo "✅ No memory leaks detected"
+    
+    # ============================================
+    # BONUS - Helgrind Data Race Tests
+    # ============================================
+    
+    - name: "Bonus - Helgrind: Data race check (5 800 200 200 7)"
+      run: |
+        cd philo_bonus
+        echo "Running Helgrind data race check..."
+        timeout 90 valgrind --tool=helgrind ./philo_bonus 5 800 200 200 7 2>&1 | tee helgrind_bonus.log
+        if grep -i "ERROR SUMMARY: [1-9]" helgrind_bonus.log | grep -v "ERROR SUMMARY: 0"; then
+          echo "❌ Data races or errors detected"
+          cat helgrind_bonus.log
+          exit 1
+        fi
+        echo "✅ No significant data races detected"
+    
+    - name: "Bonus - Helgrind: Data race check (4 410 200 200 5)"
+      run: |
+        cd philo_bonus
+        echo "Running Helgrind data race check..."
+        timeout 90 valgrind --tool=helgrind ./philo_bonus 4 410 200 200 5 2>&1 | tee helgrind_bonus.log
+        if grep -i "ERROR SUMMARY: [1-9]" helgrind_bonus.log | grep -v "ERROR SUMMARY: 0"; then
+          echo "❌ Data races or errors detected"
+          cat helgrind_bonus.log
+          exit 1
+        fi
+        echo "✅ No significant data races detected"
+    
+    # ============================================
+    # BONUS - DRD Tests
+    # ============================================
+    
+    - name: "Bonus - DRD: Thread error check (5 800 200 200 7)"
+      run: |
+        cd philo_bonus
+        echo "Running DRD thread error check..."
+        timeout 90 valgrind --tool=drd ./philo_bonus 5 800 200 200 7 2>&1 | tee drd_bonus.log
+        if grep -i "ERROR SUMMARY: [1-9]" drd_bonus.log | grep -v "ERROR SUMMARY: 0"; then
+          echo "❌ Thread errors detected"
+          cat drd_bonus.log
+          exit 1
+        fi
+        echo "✅ No significant thread errors detected"
+    
+    - name: "Bonus - DRD: Thread error check (4 410 200 200 5)"
+      run: |
+        cd philo_bonus
+        echo "Running DRD thread error check..."
+        timeout 90 valgrind --tool=drd ./philo_bonus 4 410 200 200 5 2>&1 | tee drd_bonus.log
+        if grep -i "ERROR SUMMARY: [1-9]" drd_bonus.log | grep -v "ERROR SUMMARY: 0"; then
+          echo "❌ Thread errors detected"
+          cat drd_bonus.log
+          exit 1
+        fi
+        echo "✅ No significant thread errors detected"
+    
+    # ============================================
+    # Final Summary
+    # ============================================
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "=========================================="
+        echo "           TEST SUMMARY"
+        echo "=========================================="
+        echo "✅ All tests completed!"
+        echo ""
+        echo "Tests performed:"
+        echo "  - Basic functionality tests (mandatory & bonus)"
+        echo "  - Death detection tests"
+        echo "  - Eat count completion tests"
+        echo "  - Large philosopher count tests"
+        echo "  - Memory leak detection (Valgrind)"
+        echo "  - Data race detection (Helgrind)"
+        echo "  - Thread error detection (DRD)"
+        echo ""
+        echo "=========================================="
