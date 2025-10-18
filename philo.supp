@@ -3,23 +3,26 @@
 # ========================================
 
 {
-   drd_fork_start_sem
-   drd:InvalidSemaphore
-   fun:sem_wait*
-   fun:create_start_process
-}
-
-{
-   drd_eat_watcher_sem
-   drd:InvalidSemaphore
-   fun:sem_wait*
-   fun:eat_watcher
-}
-
-{
-   drd_sem_reinitialization
+   drd_fork_start_sem_invalid
    drd:SemaphoreErr
-   fun:sem_open*
+   fun:sem_wait@*
+   fun:create_start_process
+   fun:main
+}
+
+{
+   drd_eat_watcher_sem_invalid
+   drd:SemaphoreErr
+   fun:sem_wait@*
+   fun:eat_watcher
+   fun:monitoring
+   fun:main
+}
+
+{
+   drd_sem_open_all
+   drd:SemaphoreErr
+   fun:sem_open@*
 }
 
 # ========================================
@@ -27,21 +30,32 @@
 # ========================================
 
 {
-   helgrind_fork_sem_wait
+   helgrind_fork_sem_wait_bug
    Helgrind:Misc
-   fun:sem_wait*
+   obj:*/vgpreload_helgrind-amd64-linux.so
    fun:create_start_process
+   fun:main
 }
 
 {
-   helgrind_eat_watcher
+   helgrind_eat_watcher_bug
    Helgrind:Misc
-   fun:sem_wait*
+   obj:*/vgpreload_helgrind-amd64-linux.so
    fun:eat_watcher
+   fun:monitoring
+   fun:main
 }
 
 {
-   helgrind_libpthread_bug
+   helgrind_general_sem_wait
    Helgrind:Misc
-   ...
+   obj:*/vgpreload_helgrind-amd64-linux.so
+   fun:sem_wait
+}
+
+{
+   helgrind_general_sem_post
+   Helgrind:Misc
+   obj:*/vgpreload_helgrind-amd64-linux.so
+   fun:sem_post
 }
