@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 20:19:11 by iduman            #+#    #+#             */
-/*   Updated: 2025/10/01 14:08:17 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/18 21:35:50 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,11 @@
 static void	setdead(t_monitor *monitor, int i)
 {
 	pthread_mutex_lock(&monitor->dead_mutex);
+	if (monitor->die == DIE)
+	{
+		pthread_mutex_unlock(&monitor->dead_mutex);
+		return ;
+	}
 	monitor->die = DIE;
 	monitor->philos[i].die = DIE;
 	print_events(&monitor->print_mutex, monitor->philos[i].id,
@@ -46,7 +51,7 @@ void	*monitor_routine(void *arg)
 		}
 		if (is_full(monitor))
 			return (NULL);
-		usleep(1000);
+		usleep(100);
 	}
 	return (NULL);
 }

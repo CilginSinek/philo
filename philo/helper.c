@@ -6,7 +6,7 @@
 /*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 21:06:10 by iduman            #+#    #+#             */
-/*   Updated: 2025/10/01 14:08:39 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/18 21:35:42 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,18 @@ int	is_alive_in_event(t_philo *philo, int event_time)
 	if (timeleft < event_time)
 	{
 		usleep(timeleft * 1000);
-		print_events(&philo->monitor->print_mutex, philo->id, "died",
-			philo->monitor->start_time);
 		pthread_mutex_lock(&philo->monitor->dead_mutex);
+		if (philo->monitor->die == DIE || philo->die == DIE)
+		{
+			philo->die = DIE;
+			philo->monitor->die = DIE;
+			pthread_mutex_unlock(&philo->monitor->dead_mutex);
+			return (1);
+		}
 		philo->die = DIE;
 		philo->monitor->die = DIE;
+		print_events(&philo->monitor->print_mutex, philo->id, "died",
+			philo->monitor->start_time);
 		pthread_mutex_unlock(&philo->monitor->dead_mutex);
 		return (1);
 	}
