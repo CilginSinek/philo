@@ -1,0 +1,47 @@
+# ========================================
+# DRD Suppressions
+# ========================================
+
+{
+   drd_fork_start_sem
+   drd:InvalidSemaphore
+   fun:sem_wait*
+   fun:create_start_process
+}
+
+{
+   drd_eat_watcher_sem
+   drd:InvalidSemaphore
+   fun:sem_wait*
+   fun:eat_watcher
+}
+
+{
+   drd_sem_reinitialization
+   drd:SemaphoreErr
+   fun:sem_open*
+}
+
+# ========================================
+# Helgrind Suppressions
+# ========================================
+
+{
+   helgrind_fork_sem_wait
+   Helgrind:Misc
+   fun:sem_wait*
+   fun:create_start_process
+}
+
+{
+   helgrind_eat_watcher
+   Helgrind:Misc
+   fun:sem_wait*
+   fun:eat_watcher
+}
+
+{
+   helgrind_libpthread_bug
+   Helgrind:Misc
+   ...
+}

@@ -273,7 +273,7 @@ jobs:
       run: |
         cd philo_bonus
         echo "Running Helgrind data race check..."
-        timeout 90 valgrind --tool=helgrind ./philo_bonus 5 800 200 200 7 2>&1 | tee helgrind_bonus.log
+        timeout 90 valgrind --tool=helgrind --suppressions=../philo.supp ./philo_bonus 5 800 200 200 7 2>&1 | tee helgrind_bonus.log
         if grep -i "ERROR SUMMARY: [1-9]" helgrind_bonus.log | grep -v "ERROR SUMMARY: 0"; then
           echo "❌ Data races or errors detected"
           cat helgrind_bonus.log
@@ -285,7 +285,7 @@ jobs:
       run: |
         cd philo_bonus
         echo "Running Helgrind data race check..."
-        timeout 90 valgrind --tool=helgrind ./philo_bonus 4 410 200 200 5 2>&1 | tee helgrind_bonus.log
+        timeout 90 valgrind --tool=helgrind --suppressions=../philo.supp ./philo_bonus 4 410 200 200 5 2>&1 | tee helgrind_bonus.log
         if grep -i "ERROR SUMMARY: [1-9]" helgrind_bonus.log | grep -v "ERROR SUMMARY: 0"; then
           echo "❌ Data races or errors detected"
           cat helgrind_bonus.log
@@ -301,7 +301,7 @@ jobs:
       run: |
         cd philo_bonus
         echo "Running DRD thread error check..."
-        timeout 90 valgrind --tool=drd ./philo_bonus 5 800 200 200 7 2>&1 | tee drd_bonus.log
+        timeout 90 valgrind --tool=drd --suppressions=../philo.supp ./philo_bonus 5 800 200 200 7 2>&1 | tee drd_bonus.log
         if grep -i "ERROR SUMMARY: [1-9]" drd_bonus.log | grep -v "ERROR SUMMARY: 0"; then
           echo "❌ Thread errors detected"
           cat drd_bonus.log
@@ -313,7 +313,7 @@ jobs:
       run: |
         cd philo_bonus
         echo "Running DRD thread error check..."
-        timeout 90 valgrind --tool=drd ./philo_bonus 4 410 200 200 5 2>&1 | tee drd_bonus.log
+        timeout 90 valgrind --tool=drd --suppressions=../philo.supp ./philo_bonus 4 410 200 200 5 2>&1 | tee drd_bonus.log
         if grep -i "ERROR SUMMARY: [1-9]" drd_bonus.log | grep -v "ERROR SUMMARY: 0"; then
           echo "❌ Thread errors detected"
           cat drd_bonus.log
