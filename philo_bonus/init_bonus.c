@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iduman <iduman@student.42istanbul.com.tr>  +#+  +:+       +#+        */
+/*   By: iduman <iduman@student.42istanbul.com.t    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 17:19:23 by iduman            #+#    #+#             */
-/*   Updated: 2025/09/29 05:13:42 by iduman           ###   ########.fr       */
+/*   Updated: 2025/10/22 14:26:26 by iduman           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,24 +52,24 @@ void	cleanup_semaphores(t_monitor *monitor, int *flags)
 	if (flags[0])
 	{
 		sem_close(monitor->forks);
-		sem_unlink("/forks");
+		sem_unlink(monitor->sem_names[0]);
 	}
 	if (flags[1])
 	{
 		sem_close(monitor->print_sem);
-		sem_unlink("/print_sem");
+		sem_unlink(monitor->sem_names[1]);
 	}
 	if (flags[2])
 	{
 		sem_close(monitor->start_sem);
-		sem_unlink("/start_sem");
+		sem_unlink(monitor->sem_names[2]);
 	}
 	if (flags[3])
 	{
 		if (monitor->eat_complete != NONE)
 		{
 			sem_close(monitor->eat_sems);
-			sem_unlink("/eat_sems");
+			sem_unlink(monitor->sem_names[3]);
 		}
 	}
 }
